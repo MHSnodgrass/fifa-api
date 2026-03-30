@@ -6,6 +6,10 @@ import com.snodgrass.fifa_api.model.enums.MatchStatus;
 import com.snodgrass.fifa_api.model.enums.Stage;
 import com.snodgrass.fifa_api.service.EventService;
 import com.snodgrass.fifa_api.service.TeamService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,37 +19,51 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/events")
 @RequiredArgsConstructor
+@Tag(name = "Events", description = "Endpoints for retrieving World Cup match data")
 public class EventController {
     private final EventService eventService;
     private final TeamService teamService;
 
+    @Operation(summary = "Get all events")
     @GetMapping
     public ResponseEntity<List<EventResponse>> getAllEvents() {
         return ResponseEntity.ok(eventService.getAllEvents().stream().map(EventResponse::from).toList());
     }
 
+    @Operation(summary = "Get event by ID")
+    @ApiResponse(responseCode = "404", description = "Event not found")
     @GetMapping("/{id}")
-    public ResponseEntity<EventResponse> getEventById(@PathVariable Long id) {
+    public ResponseEntity<EventResponse> getEventById(
+            @Parameter(description = "Event ID") @PathVariable Long id) {
         return ResponseEntity.ok(EventResponse.from(eventService.getEventById(id)));
     }
 
+    @Operation(summary = "Get events by group")
     @GetMapping("/group/{group}")
-    public ResponseEntity<List<EventResponse>> getEventsByGroup(@PathVariable Group group) {
+    public ResponseEntity<List<EventResponse>> getEventsByGroup(
+            @Parameter(description = "Group letter (A-L)") @PathVariable Group group) {
         return ResponseEntity.ok(eventService.getEventsByGroup(group).stream().map(EventResponse::from).toList());
     }
 
+    @Operation(summary = "Get events by stage")
     @GetMapping("/stage/{stage}")
-    public ResponseEntity<List<EventResponse>> getEventsByStage(@PathVariable Stage stage) {
+    public ResponseEntity<List<EventResponse>> getEventsByStage(
+            @Parameter(description = "Tournament stage") @PathVariable Stage stage) {
         return ResponseEntity.ok(eventService.getEventsByStage(stage).stream().map(EventResponse::from).toList());
     }
 
+    @Operation(summary = "Get events by status")
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<EventResponse>> getEventsByStatus(@PathVariable MatchStatus status) {
+    public ResponseEntity<List<EventResponse>> getEventsByStatus(
+            @Parameter(description = "Match status") @PathVariable MatchStatus status) {
         return ResponseEntity.ok(eventService.getEventsByStatus(status).stream().map(EventResponse::from).toList());
     }
 
+    @Operation(summary = "Get events by team")
+    @ApiResponse(responseCode = "404", description = "Team not found")
     @GetMapping("/team/{teamId}")
-    public ResponseEntity<List<EventResponse>> getEventsByTeam(@PathVariable Long teamId) {
+    public ResponseEntity<List<EventResponse>> getEventsByTeam(
+            @Parameter(description = "Team ID") @PathVariable Long teamId) {
         return ResponseEntity.ok(eventService.getEventsByTeam(teamService.getTeamById(teamId)).stream().map(EventResponse::from).toList());
     }
 }
