@@ -1,5 +1,6 @@
 package com.snodgrass.fifa_api.controller;
 
+import com.snodgrass.fifa_api.dto.TeamResponse;
 import com.snodgrass.fifa_api.model.Team;
 import com.snodgrass.fifa_api.model.enums.Group;
 import com.snodgrass.fifa_api.service.TeamService;
@@ -45,18 +46,18 @@ class TeamControllerTests {
     void getAllTeams_returns200WithList() {
         when(teamService.getAllTeams()).thenReturn(List.of(team));
 
-        ResponseEntity<List<Team>> response = teamController.getAllTeams();
+        ResponseEntity<List<TeamResponse>> response = teamController.getAllTeams();
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(1);
-        assertThat(response.getBody().getFirst().getCountryName()).isEqualTo("Brazil");
+        assertThat(response.getBody().getFirst().countryName()).isEqualTo("Brazil");
     }
 
     @Test
     void getAllTeams_returns200WithEmptyList_whenNoTeams() {
         when(teamService.getAllTeams()).thenReturn(List.of());
 
-        ResponseEntity<List<Team>> response = teamController.getAllTeams();
+        ResponseEntity<List<TeamResponse>> response = teamController.getAllTeams();
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEmpty();
@@ -66,12 +67,12 @@ class TeamControllerTests {
     void getTeamById_returns200_whenFound() {
         when(teamService.getTeamById(1L)).thenReturn(team);
 
-        ResponseEntity<Team> response = teamController.getTeamById(1L);
+        ResponseEntity<TeamResponse> response = teamController.getTeamById(1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assert response.getBody() != null;
-        assertThat(response.getBody().getId()).isEqualTo(1L);
-        assertThat(response.getBody().getCountryName()).isEqualTo("Brazil");
+        assertThat(response.getBody().id()).isEqualTo(1L);
+        assertThat(response.getBody().countryName()).isEqualTo("Brazil");
     }
 
     @Test
@@ -87,18 +88,18 @@ class TeamControllerTests {
     void getTeamsByGroup_returns200WithList() {
         when(teamService.getTeamsByGroup(Group.A)).thenReturn(List.of(team));
 
-        ResponseEntity<List<Team>> response = teamController.getTeamsByGroup(Group.A);
+        ResponseEntity<List<TeamResponse>> response = teamController.getTeamsByGroup(Group.A);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(1);
-        assertThat(response.getBody().getFirst().getGroupLetter()).isEqualTo(Group.A);
+        assertThat(response.getBody().getFirst().groupLetter()).isEqualTo(Group.A);
     }
 
     @Test
     void getTeamsByGroup_returns200WithEmptyList_whenNoTeamsInGroup() {
         when(teamService.getTeamsByGroup(Group.B)).thenReturn(List.of());
 
-        ResponseEntity<List<Team>> response = teamController.getTeamsByGroup(Group.B);
+        ResponseEntity<List<TeamResponse>> response = teamController.getTeamsByGroup(Group.B);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEmpty();

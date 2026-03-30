@@ -1,5 +1,6 @@
 package com.snodgrass.fifa_api.controller;
 
+import com.snodgrass.fifa_api.dto.EventResponse;
 import com.snodgrass.fifa_api.model.Event;
 import com.snodgrass.fifa_api.model.Team;
 import com.snodgrass.fifa_api.model.enums.Group;
@@ -67,18 +68,18 @@ class EventControllerTests {
     void getAllEvents_returns200WithList() {
         when(eventService.getAllEvents()).thenReturn(List.of(event));
 
-        ResponseEntity<List<Event>> response = eventController.getAllEvents();
+        ResponseEntity<List<EventResponse>> response = eventController.getAllEvents();
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(1);
-        assertThat(response.getBody().getFirst().getArenaName()).isEqualTo("Lusail Stadium");
+        assertThat(response.getBody().getFirst().arenaName()).isEqualTo("Lusail Stadium");
     }
 
     @Test
     void getAllEvents_returns200WithEmptyList_whenNoEvents() {
         when(eventService.getAllEvents()).thenReturn(List.of());
 
-        ResponseEntity<List<Event>> response = eventController.getAllEvents();
+        ResponseEntity<List<EventResponse>> response = eventController.getAllEvents();
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEmpty();
@@ -88,12 +89,12 @@ class EventControllerTests {
     void getEventById_returns200_whenFound() {
         when(eventService.getEventById(1L)).thenReturn(event);
 
-        ResponseEntity<Event> response = eventController.getEventById(1L);
+        ResponseEntity<EventResponse> response = eventController.getEventById(1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assert response.getBody() != null;
-        assertThat(response.getBody().getId()).isEqualTo(1L);
-        assertThat(response.getBody().getMatchNumber()).isEqualTo(1);
+        assertThat(response.getBody().id()).isEqualTo(1L);
+        assertThat(response.getBody().matchNumber()).isEqualTo(1);
     }
 
     @Test
@@ -109,18 +110,18 @@ class EventControllerTests {
     void getEventsByGroup_returns200WithList() {
         when(eventService.getEventsByGroup(Group.A)).thenReturn(List.of(event));
 
-        ResponseEntity<List<Event>> response = eventController.getEventsByGroup(Group.A);
+        ResponseEntity<List<EventResponse>> response = eventController.getEventsByGroup(Group.A);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(1);
-        assertThat(response.getBody().getFirst().getGroupLetter()).isEqualTo(Group.A);
+        assertThat(response.getBody().getFirst().groupLetter()).isEqualTo(Group.A);
     }
 
     @Test
     void getEventsByGroup_returns200WithEmptyList_whenNoEventsInGroup() {
         when(eventService.getEventsByGroup(Group.B)).thenReturn(List.of());
 
-        ResponseEntity<List<Event>> response = eventController.getEventsByGroup(Group.B);
+        ResponseEntity<List<EventResponse>> response = eventController.getEventsByGroup(Group.B);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEmpty();
@@ -130,18 +131,18 @@ class EventControllerTests {
     void getEventsByStage_returns200WithList() {
         when(eventService.getEventsByStage(Stage.GROUP)).thenReturn(List.of(event));
 
-        ResponseEntity<List<Event>> response = eventController.getEventsByStage(Stage.GROUP);
+        ResponseEntity<List<EventResponse>> response = eventController.getEventsByStage(Stage.GROUP);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(1);
-        assertThat(response.getBody().getFirst().getStage()).isEqualTo(Stage.GROUP);
+        assertThat(response.getBody().getFirst().stage()).isEqualTo(Stage.GROUP);
     }
 
     @Test
     void getEventsByStage_returns200WithEmptyList_whenNoEventsForStage() {
         when(eventService.getEventsByStage(Stage.FINAL)).thenReturn(List.of());
 
-        ResponseEntity<List<Event>> response = eventController.getEventsByStage(Stage.FINAL);
+        ResponseEntity<List<EventResponse>> response = eventController.getEventsByStage(Stage.FINAL);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEmpty();
@@ -151,18 +152,18 @@ class EventControllerTests {
     void getEventsByStatus_returns200WithList() {
         when(eventService.getEventsByStatus(MatchStatus.SCHEDULED)).thenReturn(List.of(event));
 
-        ResponseEntity<List<Event>> response = eventController.getEventsByStatus(MatchStatus.SCHEDULED);
+        ResponseEntity<List<EventResponse>> response = eventController.getEventsByStatus(MatchStatus.SCHEDULED);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(1);
-        assertThat(response.getBody().getFirst().getStatus()).isEqualTo(MatchStatus.SCHEDULED);
+        assertThat(response.getBody().getFirst().status()).isEqualTo(MatchStatus.SCHEDULED);
     }
 
     @Test
     void getEventsByStatus_returns200WithEmptyList_whenNoEventsForStatus() {
         when(eventService.getEventsByStatus(MatchStatus.FINISHED)).thenReturn(List.of());
 
-        ResponseEntity<List<Event>> response = eventController.getEventsByStatus(MatchStatus.FINISHED);
+        ResponseEntity<List<EventResponse>> response = eventController.getEventsByStatus(MatchStatus.FINISHED);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEmpty();
@@ -173,7 +174,7 @@ class EventControllerTests {
         when(teamService.getTeamById(1L)).thenReturn(team);
         when(eventService.getEventsByTeam(team)).thenReturn(List.of(event));
 
-        ResponseEntity<List<Event>> response = eventController.getEventsByTeam(1L);
+        ResponseEntity<List<EventResponse>> response = eventController.getEventsByTeam(1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(1);

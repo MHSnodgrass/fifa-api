@@ -1,8 +1,8 @@
 package com.snodgrass.fifa_api.controller;
 
+import com.snodgrass.fifa_api.dto.EventResponse;
+import com.snodgrass.fifa_api.dto.TeamResponse;
 import com.snodgrass.fifa_api.exception.ErrorResponse;
-import com.snodgrass.fifa_api.model.Event;
-import com.snodgrass.fifa_api.model.Team;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,7 +31,7 @@ class ControllerIntegrationTests {
     // Team
     @Test
     void getAllTeams_returns200WithNonEmptyList() {
-        ResponseEntity<List<Team>> response = restClient.get()
+        ResponseEntity<List<TeamResponse>> response = restClient.get()
                 .uri("/api/teams")
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<>() {});
@@ -56,7 +56,7 @@ class ControllerIntegrationTests {
     // Event
     @Test
     void getAllEvents_returns200WithNonEmptyList() {
-        ResponseEntity<List<Event>> response = restClient.get()
+        ResponseEntity<List<EventResponse>> response = restClient.get()
                 .uri("/api/events")
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<>() {});
