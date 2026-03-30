@@ -1,0 +1,80 @@
+package com.snodgrass.fifa_api.controller;
+
+import com.snodgrass.fifa_api.exception.ErrorResponse;
+import com.snodgrass.fifa_api.model.Event;
+import com.snodgrass.fifa_api.model.Team;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClient;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class ControllerIntegrationTests {
+    @LocalServerPort
+    private int port;
+
+    private RestClient restClient;
+
+    @BeforeEach
+    void setUp() {
+        restClient = RestClient.create("http://localhost:" + port);
+    }
+
+    // Team
+    @Test
+    void getAllTeams_returns200WithNonEmptyList() {
+        ResponseEntity<List<Team>> response = restClient.get()
+                .uri("/api/teams")
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotEmpty();
+    }
+
+    @Test
+    void getTeamById_returns404_whenNotFound() {
+        ResponseEntity<ErrorResponse> response = restClient.get()
+                .uri("/api/teams/999999")
+                .retrieve()
+                .onStatus(status -> status.value() == 404, (req, res) -> {})
+                .toEntity(ErrorResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).contains("999999");
+    }
+
+    // Event
+    @Test
+    void getAllEvents_returns200WithNonEmptyList() {
+        ResponseEntity<List<Event>> response = restClient.get()
+                .uri("/api/events")
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotEmpty();
+    }
+
+    @Test
+    void getEventById_returns404_whenNotFound() {
+        ResponseEntity<ErrorResponse> response = restClient.get()
+                .uri("/api/events/999999")
+                .retrieve()
+                .onStatus(status -> status.value() == 404, (req, res) -> {})
+                .toEntity(ErrorResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).contains("999999");
+    }
+}
