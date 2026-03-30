@@ -82,4 +82,25 @@ class TeamControllerTests {
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("99");
     }
+
+    @Test
+    void getTeamsByGroup_returns200WithList() {
+        when(teamService.getTeamsByGroup(Group.A)).thenReturn(List.of(team));
+
+        ResponseEntity<List<Team>> response = teamController.getTeamsByGroup(Group.A);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).hasSize(1);
+        assertThat(response.getBody().getFirst().getGroupLetter()).isEqualTo(Group.A);
+    }
+
+    @Test
+    void getTeamsByGroup_returns200WithEmptyList_whenNoTeamsInGroup() {
+        when(teamService.getTeamsByGroup(Group.B)).thenReturn(List.of());
+
+        ResponseEntity<List<Team>> response = teamController.getTeamsByGroup(Group.B);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEmpty();
+    }
 }

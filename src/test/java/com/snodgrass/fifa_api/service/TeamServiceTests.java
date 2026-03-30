@@ -79,4 +79,23 @@ class TeamServiceTests {
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("99");
     }
+
+    @Test
+    void getTeamsByGroup_returnsTeamsInGroup() {
+        when(teamRepository.findByGroupLetter(Group.A)).thenReturn(List.of(team));
+
+        List<Team> result = teamService.getTeamsByGroup(Group.A);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getGroupLetter()).isEqualTo(Group.A);
+    }
+
+    @Test
+    void getTeamsByGroup_returnsEmptyList_whenNoTeamsInGroup() {
+        when(teamRepository.findByGroupLetter(Group.B)).thenReturn(List.of());
+
+        List<Team> result = teamService.getTeamsByGroup(Group.B);
+
+        assertThat(result).isEmpty();
+    }
 }

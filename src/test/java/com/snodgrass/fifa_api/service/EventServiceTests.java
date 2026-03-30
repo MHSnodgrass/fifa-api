@@ -1,6 +1,8 @@
 package com.snodgrass.fifa_api.service;
 
 import com.snodgrass.fifa_api.model.Event;
+import com.snodgrass.fifa_api.model.Team;
+import com.snodgrass.fifa_api.model.enums.Group;
 import com.snodgrass.fifa_api.model.enums.MatchStatus;
 import com.snodgrass.fifa_api.model.enums.Stage;
 import com.snodgrass.fifa_api.repository.EventRepository;
@@ -38,6 +40,7 @@ class EventServiceTests {
         event.setId(1L);
         event.setMatchNumber(1);
         event.setStage(Stage.GROUP);
+        event.setGroupLetter(Group.A);
         event.setArenaName("Lusail Stadium");
         event.setCity("Lusail");
         event.setMatchDate(LocalDate.of(2026, 6, 11));
@@ -83,5 +86,84 @@ class EventServiceTests {
         assertThatThrownBy(() -> eventService.getEventById(99L))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("99");
+    }
+
+    @Test
+    void getEventsByGroup_returnsEventsInGroup() {
+        when(eventRepository.findByGroupLetter(Group.A)).thenReturn(List.of(event));
+
+        List<Event> result = eventService.getEventsByGroup(Group.A);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getGroupLetter()).isEqualTo(Group.A);
+    }
+
+    @Test
+    void getEventsByGroup_returnsEmptyList_whenNoEventsInGroup() {
+        when(eventRepository.findByGroupLetter(Group.B)).thenReturn(List.of());
+
+        List<Event> result = eventService.getEventsByGroup(Group.B);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getEventsByStage_returnsEventsByStage() {
+        when(eventRepository.findByStage(Stage.GROUP)).thenReturn(List.of(event));
+
+        List<Event> result = eventService.getEventsByStage(Stage.GROUP);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getStage()).isEqualTo(Stage.GROUP);
+    }
+
+    @Test
+    void getEventsByStage_returnsEmptyList_whenNoEventsForStage() {
+        when(eventRepository.findByStage(Stage.FINAL)).thenReturn(List.of());
+
+        List<Event> result = eventService.getEventsByStage(Stage.FINAL);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getEventsByStatus_returnsEventsByStatus() {
+        when(eventRepository.findByStatus(MatchStatus.SCHEDULED)).thenReturn(List.of(event));
+
+        List<Event> result = eventService.getEventsByStatus(MatchStatus.SCHEDULED);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getStatus()).isEqualTo(MatchStatus.SCHEDULED);
+    }
+
+    @Test
+    void getEventsByStatus_returnsEmptyList_whenNoEventsForStatus() {
+        when(eventRepository.findByStatus(MatchStatus.FINISHED)).thenReturn(List.of());
+
+        List<Event> result = eventService.getEventsByStatus(MatchStatus.FINISHED);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getEventsByTeam_returnsMatchHistory() {
+        Team team = new Team();
+        team.setId(1L);
+        when(eventRepository.findByHomeTeamOrAwayTeam(team, team)).thenReturn(List.of(event));
+
+        List<Event> result = eventService.getEventsByTeam(team);
+
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    void getEventsByTeam_returnsEmptyList_whenNoMatches() {
+        Team team = new Team();
+        team.setId(99L);
+        when(eventRepository.findByHomeTeamOrAwayTeam(team, team)).thenReturn(List.of());
+
+        List<Event> result = eventService.getEventsByTeam(team);
+
+        assertThat(result).isEmpty();
     }
 }
