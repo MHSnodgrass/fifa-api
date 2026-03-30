@@ -1,7 +1,6 @@
-package com.snodgrass.fifa_api;
+package com.snodgrass.fifa_api.repository;
 
 import com.snodgrass.fifa_api.model.Team;
-import com.snodgrass.fifa_api.repository.TeamRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +18,5 @@ public class TeamRepositoryTests {
     public void shouldLoadTeams() {
         List<Team> teams = teamRepository.findAll();
         assertThat(teams).isNotEmpty();
-        System.out.println(teams.getFirst().getCountryName());
     }
 }

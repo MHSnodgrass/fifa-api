@@ -1,7 +1,6 @@
-package com.snodgrass.fifa_api;
+package com.snodgrass.fifa_api.repository;
 
 import com.snodgrass.fifa_api.model.Event;
-import com.snodgrass.fifa_api.repository.EventRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +18,5 @@ public class EventRepositoryTests {
     void shouldLoadEvents() {
         List<Event> events = eventRepository.findAll();
         assertFalse(events.isEmpty());
-        System.out.println(events.getFirst().getMatchDate());
     }
 }
