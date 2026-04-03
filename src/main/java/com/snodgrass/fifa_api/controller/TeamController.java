@@ -8,11 +8,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/teams")
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class TeamController {
     @Operation(summary = "Get all teams")
     @GetMapping
     public ResponseEntity<List<TeamResponse>> getAllTeams() {
+        log.debug("GET /api/teams - Fetching all teams");
         return ResponseEntity.ok(teamService.getAllTeams().stream().map(TeamResponse::from).toList());
     }
 
@@ -31,6 +34,7 @@ public class TeamController {
     @GetMapping("/{id}")
     public ResponseEntity<TeamResponse> getTeamById(
             @Parameter(description = "Team ID") @PathVariable Long id) {
+        log.debug("GET /api/teams/{} - Fetching team by id", id);
         return ResponseEntity.ok(TeamResponse.from(teamService.getTeamById(id)));
     }
 
@@ -38,6 +42,7 @@ public class TeamController {
     @GetMapping("/group/{group}")
     public ResponseEntity<List<TeamResponse>> getTeamsByGroup(
             @Parameter(description = "Group letter (A-L)") @PathVariable Group group) {
+        log.debug("GET /api/teams/group/{} - Fetching teams by group", group);
         return ResponseEntity.ok(teamService.getTeamsByGroup(group).stream().map(TeamResponse::from).toList());
     }
 }
