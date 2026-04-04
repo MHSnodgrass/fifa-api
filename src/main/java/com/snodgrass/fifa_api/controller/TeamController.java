@@ -1,5 +1,6 @@
 package com.snodgrass.fifa_api.controller;
 
+import com.snodgrass.fifa_api.dto.TeamDetailResponse;
 import com.snodgrass.fifa_api.dto.TeamResponse;
 import com.snodgrass.fifa_api.model.enums.Group;
 import com.snodgrass.fifa_api.service.TeamService;
@@ -29,13 +30,13 @@ public class TeamController {
         return ResponseEntity.ok(teamService.getAllTeams().stream().map(TeamResponse::from).toList());
     }
 
-    @Operation(summary = "Get team by ID")
+    @Operation(summary = "Get team details by ID (includes squad information")
     @ApiResponse(responseCode = "404", description = "Team not found")
     @GetMapping("/{id}")
-    public ResponseEntity<TeamResponse> getTeamById(
+    public ResponseEntity<TeamDetailResponse> getTeamById(
             @Parameter(description = "Team ID") @PathVariable Long id) {
         log.debug("GET /api/teams/{} - Fetching team by id", id);
-        return ResponseEntity.ok(TeamResponse.from(teamService.getTeamById(id)));
+        return ResponseEntity.ok(TeamDetailResponse.from(teamService.getTeamById(id)));
     }
 
     @Operation(summary = "Get teams by group")
