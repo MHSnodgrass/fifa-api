@@ -1,5 +1,6 @@
 package com.snodgrass.fifa_api.controller;
 
+import com.snodgrass.fifa_api.dto.TeamDetailResponse;
 import com.snodgrass.fifa_api.dto.TeamResponse;
 import com.snodgrass.fifa_api.model.Team;
 import com.snodgrass.fifa_api.model.enums.Group;
@@ -38,6 +39,7 @@ class TeamControllerTests {
         team.setCountryName("Brazil");
         team.setCountryCode("BRA");
         team.setGroupLetter(Group.A);
+        team.setSquad("[{\"name\":\"Neymar Jr\",\"number\":10,\"position\":\"FW\",\"isCaptain\":true}]");
         team.setCreatedAt(LocalDateTime.now());
         team.setUpdatedAt(LocalDateTime.now());
     }
@@ -67,12 +69,15 @@ class TeamControllerTests {
     void getTeamById_returns200_whenFound() {
         when(teamService.getTeamById(1L)).thenReturn(team);
 
-        ResponseEntity<TeamResponse> response = teamController.getTeamById(1L);
+        ResponseEntity<TeamDetailResponse> response = teamController.getTeamById(1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assert response.getBody() != null;
         assertThat(response.getBody().id()).isEqualTo(1L);
         assertThat(response.getBody().countryName()).isEqualTo("Brazil");
+        assertThat(response.getBody().squad()).hasSize(1);
+        assertThat(response.getBody().squad().getFirst().name()).isEqualTo("Neymar Jr");
+        assertThat(response.getBody().squad().getFirst().isCaptain()).isTrue();
     }
 
     @Test
