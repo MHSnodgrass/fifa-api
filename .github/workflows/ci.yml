@@ -1,0 +1,19 @@
+name: CI
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test:
+    if: github.actor == 'MHSnodgrass'
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run tests
+        env:
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: ./mvnw test -Dspring.profiles.active=ci
