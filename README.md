@@ -28,7 +28,7 @@ A read-only REST API serving FIFA World Cup 2026 team and match (mock) data.
 
 ## Setup
 
-### 1. Database
+### 1. Database Setup
 
 The project includes a Python script that creates the database, tables, and seeds all data — 48 teams with full squads and 104 matches (72 group stage + 32 knockout). Match dates are generated dynamically starting from tomorrow relative to when the script is run.
 
@@ -111,3 +111,55 @@ http://localhost:8080/v3/api-docs
 **Stage values:** `GROUP`, `ROUND_OF_32`, `ROUND_OF_16`, `QUARTERFINAL`, `SEMIFINAL`, `THIRD_PLACE`, `FINAL`
 
 **Status values:** `SCHEDULED`, `IN_PROGRESS`, `HALFTIME`, `FINISHED`, `POSTPONED`, `CANCELLED`
+
+---
+
+## Multi-Tenancy
+
+The API uses Hibernate's multi-tenancy support to route database queries to different MySQL schemas depending on the request context. This allows the application and its tests to operate against separate databases without any code changes.
+
+### How It Works
+
+Two schemas are used:
+
+| Schema | Purpose |
+|--------|---------|
+| `fifa_world_cup` | Production schema, used for all normal requests |
+| `fifa_world_cup_test` | Test schema, used when the test header is present |
+
+On each request, a `HandlerInterceptor` reads an HTTP header and sets the active schema on a `ThreadLocal`. Hibernate's `CurrentTenantIdentifierResolver` reads that value to determine which schema to query, and `MultiTenantConnectionProvider` switches the JDBC connection to the correct MySQL catalog before executing any query. The `ThreadLocal` is cleared after each request completes.
+
+### Switching to the Test Schema
+
+To route a request to the test schema, include the following HTTP header:
+
+```
+X-DB-STATE: MODIFIED
+```
+
+Any request without this header, or with a different value, will use the production schema.
+
+Example using curl:
+
+```bash
+# Production schema (default)
+curl http://localhost:8080/api/teams
+
+# Test schema
+curl -H "X-DB-STATE: MODIFIED" http://localhost:8080/api/teams
+```
+
+### Configuration
+
+The schema names and header details are controlled by properties in `application.properties`:
+
+```properties
+app.tenant.default-schema=fifa_world_cup
+app.tenant.test-schema=fifa_world_cup_test
+app.tenant.http-test-header=X-DB-STATE
+app.tenant.http-test-header-value=MODIFIED
+```
+
+### Setup Script
+
+The Python setup script (`setup_worldcup.py`) creates and seeds both schemas. Run it once before starting the application or running integration tests.
