@@ -163,3 +163,23 @@ app.tenant.http-test-header-value=MODIFIED
 ### Setup Script
 
 The Python setup script (`setup_worldcup.py`) creates and seeds both schemas. Run it once before starting the application or running integration tests.
+
+---
+
+## CI
+
+Tests run automatically via GitHub Actions on every push made by the repository owner. The workflow can also be triggered manually from the Actions tab in GitHub for other contributors.
+
+### How It Works
+
+A self-hosted GitHub Actions runner is hosted on a personal TrueNAS Scale server running as a Docker container. A shared MySQL container on the same Docker network provides the database for the test run. The runner connects to MySQL using the service name `fifa-mysql` as the hostname, which Docker resolves internally.
+
+Tests run using the `ci` Spring profile, which reads from `src/test/resources/application-ci.properties`. Database credentials are stored as GitHub Actions secrets and injected into the runner as environment variables at runtime — they are not stored in the codebase.
+
+### Running Tests Locally
+
+```bash
+./mvnw test
+```
+
+Local test runs use `src/main/resources/application.properties` and connect to your local MySQL instance. The `ci` profile is not activated locally so no additional setup is needed.
