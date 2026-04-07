@@ -22,6 +22,7 @@ import getpass
 
 # ── Connection Config ────────────────────────────────────────
 DB_NAME = "fifa_world_cup"
+DB_TEST_NAME = "fifa_world_cup_test"
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
 
@@ -31,79 +32,82 @@ MYSQL_USER = "root"
 TOURNAMENT_START = date.today() + timedelta(days=1)
 
 # ── DDL ──────────────────────────────────────────────────────
-DDL_STATEMENTS = [
-    f"DROP DATABASE IF EXISTS {DB_NAME}",
-    f"CREATE DATABASE {DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
-    f"USE {DB_NAME}",
-    "SET time_zone = '+00:00'",
-    """
-    CREATE TABLE teams (
-        id              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
-        country_name    VARCHAR(100)    NOT NULL,
-        country_code    CHAR(3)         NOT NULL COMMENT 'FIFA country code',
-        flag_url        VARCHAR(512)    DEFAULT NULL,
-        logo_url        VARCHAR(512)    DEFAULT NULL,
-        fifa_ranking    SMALLINT UNSIGNED DEFAULT NULL,
-        group_letter    CHAR(1)         NOT NULL COMMENT 'Tournament group A-L',
-        manager_name    VARCHAR(200)    DEFAULT NULL,
-        squad           JSON            DEFAULT NULL,
-        matches_played  TINYINT UNSIGNED NOT NULL DEFAULT 0,
-        wins            TINYINT UNSIGNED NOT NULL DEFAULT 0,
-        draws           TINYINT UNSIGNED NOT NULL DEFAULT 0,
-        losses          TINYINT UNSIGNED NOT NULL DEFAULT 0,
-        goals_for       SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-        goals_against   SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-        goal_difference SMALLINT         NOT NULL DEFAULT 0,
-        group_points    TINYINT UNSIGNED NOT NULL DEFAULT 0,
-        yellow_cards    SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-        red_cards       SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-        eliminated      BOOLEAN         NOT NULL DEFAULT FALSE,
-        created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        PRIMARY KEY (id),
-        UNIQUE KEY uq_country_code (country_code),
-        UNIQUE KEY uq_country_name (country_name),
-        INDEX idx_group (group_letter)
-    ) ENGINE=InnoDB
-    """,
-    """
-    CREATE TABLE events (
-        id                    INT UNSIGNED    NOT NULL AUTO_INCREMENT,
-        match_number          SMALLINT UNSIGNED NOT NULL COMMENT 'Official match number 1-104',
-        stage                 ENUM('GROUP','ROUND_OF_32','ROUND_OF_16','QUARTERFINAL','SEMIFINAL','THIRD_PLACE','FINAL') NOT NULL,
-        group_letter          CHAR(1)         DEFAULT NULL,
-        home_team_id          INT UNSIGNED    DEFAULT NULL,
-        away_team_id          INT UNSIGNED    DEFAULT NULL,
-        home_team_placeholder VARCHAR(50)     DEFAULT NULL,
-        away_team_placeholder VARCHAR(50)     DEFAULT NULL,
-        match_date            DATE            NOT NULL,
-        kickoff_time          TIME            DEFAULT NULL,
-        kickoff_utc           DATETIME        DEFAULT NULL,
-        arena_name            VARCHAR(200)    NOT NULL,
-        city                  VARCHAR(100)    NOT NULL,
-        status                ENUM('SCHEDULED','IN_PROGRESS','HALFTIME','FINISHED','POSTPONED','CANCELLED') NOT NULL DEFAULT 'SCHEDULED',
-        match_state           JSON            DEFAULT NULL,
-        home_score            TINYINT UNSIGNED DEFAULT NULL,
-        away_score            TINYINT UNSIGNED DEFAULT NULL,
-        winner_team_id        INT UNSIGNED    DEFAULT NULL,
-        is_draw               BOOLEAN         DEFAULT NULL,
-        has_extra_time        BOOLEAN         NOT NULL DEFAULT FALSE,
-        has_penalties         BOOLEAN         NOT NULL DEFAULT FALSE,
-        created_at            TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at            TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        PRIMARY KEY (id),
-        UNIQUE KEY uq_match_number (match_number),
-        INDEX idx_stage (stage),
-        INDEX idx_match_date (match_date),
-        INDEX idx_status (status),
-        INDEX idx_home_team (home_team_id),
-        INDEX idx_away_team (away_team_id),
-        CONSTRAINT fk_home_team  FOREIGN KEY (home_team_id)  REFERENCES teams(id) ON DELETE SET NULL ON UPDATE CASCADE,
-        CONSTRAINT fk_away_team  FOREIGN KEY (away_team_id)  REFERENCES teams(id) ON DELETE SET NULL ON UPDATE CASCADE,
-        CONSTRAINT fk_winner     FOREIGN KEY (winner_team_id) REFERENCES teams(id) ON DELETE SET NULL ON UPDATE CASCADE
-    ) ENGINE=InnoDB
-    """,
-]
+def create_ddl_statement(db_name):
+    DDL_STATEMENTS = [
+        f"DROP DATABASE IF EXISTS {db_name}",
+        f"CREATE DATABASE {db_name} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
+        f"USE {db_name}",
+        "SET time_zone = '+00:00'",
+        """
+        CREATE TABLE teams (
+            id              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+            country_name    VARCHAR(100)    NOT NULL,
+            country_code    CHAR(3)         NOT NULL COMMENT 'FIFA country code',
+            flag_url        VARCHAR(512)    DEFAULT NULL,
+            logo_url        VARCHAR(512)    DEFAULT NULL,
+            fifa_ranking    SMALLINT UNSIGNED DEFAULT NULL,
+            group_letter    CHAR(1)         NOT NULL COMMENT 'Tournament group A-L',
+            manager_name    VARCHAR(200)    DEFAULT NULL,
+            squad           JSON            DEFAULT NULL,
+            matches_played  TINYINT UNSIGNED NOT NULL DEFAULT 0,
+            wins            TINYINT UNSIGNED NOT NULL DEFAULT 0,
+            draws           TINYINT UNSIGNED NOT NULL DEFAULT 0,
+            losses          TINYINT UNSIGNED NOT NULL DEFAULT 0,
+            goals_for       SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+            goals_against   SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+            goal_difference SMALLINT         NOT NULL DEFAULT 0,
+            group_points    TINYINT UNSIGNED NOT NULL DEFAULT 0,
+            yellow_cards    SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+            red_cards       SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+            eliminated      BOOLEAN         NOT NULL DEFAULT FALSE,
+            created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY uq_country_code (country_code),
+            UNIQUE KEY uq_country_name (country_name),
+            INDEX idx_group (group_letter)
+        ) ENGINE=InnoDB
+        """,
+        """
+        CREATE TABLE events (
+            id                    INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+            match_number          SMALLINT UNSIGNED NOT NULL COMMENT 'Official match number 1-104',
+            stage                 ENUM('GROUP','ROUND_OF_32','ROUND_OF_16','QUARTERFINAL','SEMIFINAL','THIRD_PLACE','FINAL') NOT NULL,
+            group_letter          CHAR(1)         DEFAULT NULL,
+            home_team_id          INT UNSIGNED    DEFAULT NULL,
+            away_team_id          INT UNSIGNED    DEFAULT NULL,
+            home_team_placeholder VARCHAR(50)     DEFAULT NULL,
+            away_team_placeholder VARCHAR(50)     DEFAULT NULL,
+            match_date            DATE            NOT NULL,
+            kickoff_time          TIME            DEFAULT NULL,
+            kickoff_utc           DATETIME        DEFAULT NULL,
+            arena_name            VARCHAR(200)    NOT NULL,
+            city                  VARCHAR(100)    NOT NULL,
+            status                ENUM('SCHEDULED','IN_PROGRESS','HALFTIME','FINISHED','POSTPONED','CANCELLED') NOT NULL DEFAULT 'SCHEDULED',
+            match_state           JSON            DEFAULT NULL,
+            home_score            TINYINT UNSIGNED DEFAULT NULL,
+            away_score            TINYINT UNSIGNED DEFAULT NULL,
+            winner_team_id        INT UNSIGNED    DEFAULT NULL,
+            is_draw               BOOLEAN         DEFAULT NULL,
+            has_extra_time        BOOLEAN         NOT NULL DEFAULT FALSE,
+            has_penalties         BOOLEAN         NOT NULL DEFAULT FALSE,
+            created_at            TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at            TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY uq_match_number (match_number),
+            INDEX idx_stage (stage),
+            INDEX idx_match_date (match_date),
+            INDEX idx_status (status),
+            INDEX idx_home_team (home_team_id),
+            INDEX idx_away_team (away_team_id),
+            CONSTRAINT fk_home_team  FOREIGN KEY (home_team_id)  REFERENCES teams(id) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT fk_away_team  FOREIGN KEY (away_team_id)  REFERENCES teams(id) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT fk_winner     FOREIGN KEY (winner_team_id) REFERENCES teams(id) ON DELETE SET NULL ON UPDATE CASCADE
+        ) ENGINE=InnoDB
+        """,
+    ]
+
+    return DDL_STATEMENTS
 
 # ── Venues (actual 2026 host stadiums) ───────────────────────
 VENUES = [
@@ -883,41 +887,19 @@ def generate_knockout_matches(start_date, next_match_num, venues):
     return matches
 
 
-# ── Main ─────────────────────────────────────────────────────
-def main():
-    print("=" * 60)
-    print("  FIFA World Cup 2026 — Database Setup")
-    print("=" * 60)
-    print(f"  Tournament start date: {TOURNAMENT_START}")
-    print(f"  MySQL host: {MYSQL_HOST}")
-    print(f"  MySQL user: {MYSQL_USER}")
-    print()
-
-    password = getpass.getpass(f"Enter MySQL password for '{MYSQL_USER}': ")
-
-    try:
-        conn = mysql.connect(
-            host=MYSQL_HOST,
-            user=MYSQL_USER,
-            password=password,
-        )
-    except mysql.Error as e:
-        print(f"  [ERROR] Could not connect to MySQL: {e}")
-        sys.exit(1)
-
+# ── Per-database Setup ───────────────────────────────────────
+def setup_database(conn, db_name):
+    """Create, populate, and seed a single database by name."""
     cursor = conn.cursor()
-    print("\n  [1/4] Creating database and tables...")
+    print(f"\n  Setting up '{db_name}'...")
+    print("    [1/4] Creating database and tables...")
 
-    for stmt in DDL_STATEMENTS:
+    for stmt in create_ddl_statement(db_name):
         cursor.execute(stmt)
     conn.commit()
 
-    # Switch to the new database
-    cursor.execute(f"USE {DB_NAME}")
-    cursor.execute("SET time_zone = '+00:00'")
-
     # ── Insert teams ─────────────────────────────────────────
-    print("  [2/4] Inserting 48 teams with squads...")
+    print("    [2/4] Inserting 48 teams with squads...")
 
     team_insert = """
         INSERT INTO teams
@@ -939,18 +921,18 @@ def main():
         code_to_id[t_code] = cursor.lastrowid
 
     conn.commit()
-    print(f"         → {len(TEAMS_DATA)} teams inserted.")
+    print(f"           → {len(TEAMS_DATA)} teams inserted.")
 
     # ── Generate & insert matches ────────────────────────────
-    print("  [3/4] Generating match schedule...")
+    print("    [3/4] Generating match schedule...")
 
     group_matches, next_mn = generate_group_matches(TOURNAMENT_START, VENUES)
     knockout_matches = generate_knockout_matches(TOURNAMENT_START, next_mn, VENUES)
 
     all_matches = group_matches + knockout_matches
-    print(f"         → {len(group_matches)} group + {len(knockout_matches)} knockout = {len(all_matches)} total")
+    print(f"           → {len(group_matches)} group + {len(knockout_matches)} knockout = {len(all_matches)} total")
 
-    print("  [4/4] Inserting matches...")
+    print("    [4/4] Inserting matches...")
 
     event_insert = """
         INSERT INTO events
@@ -967,7 +949,6 @@ def main():
         away_id = code_to_id.get(m.get("away_code"))
 
         if home_id and away_id:
-            # Group match — look up team names for placeholders too
             h_name = next(t[0] for t in TEAMS_DATA if t[1] == m["home_code"])
             a_name = next(t[0] for t in TEAMS_DATA if t[1] == m["away_code"])
             h_placeholder = h_name
@@ -996,15 +977,43 @@ def main():
         ))
 
     conn.commit()
-    print(f"         → {len(all_matches)} matches inserted.")
+    print(f"           → {len(all_matches)} matches inserted.")
 
     cursor.close()
+    print(f"    ✓ '{db_name}' is ready.")
+
+
+# ── Main ─────────────────────────────────────────────────────
+def main():
+    print("=" * 60)
+    print("  FIFA World Cup 2026 — Database Setup")
+    print("=" * 60)
+    print(f"  Tournament start date: {TOURNAMENT_START}")
+    print(f"  MySQL host: {MYSQL_HOST}")
+    print(f"  MySQL user: {MYSQL_USER}")
+    print(f"  Databases: {DB_NAME}, {DB_TEST_NAME}")
+    print()
+
+    password = getpass.getpass(f"Enter MySQL password for '{MYSQL_USER}': ")
+
+    try:
+        conn = mysql.connect(
+            host=MYSQL_HOST,
+            user=MYSQL_USER,
+            password=password,
+        )
+    except mysql.Error as e:
+        print(f"  [ERROR] Could not connect to MySQL: {e}")
+        sys.exit(1)
+
+    for db_name in (DB_NAME, DB_TEST_NAME):
+        setup_database(conn, db_name)
+
     conn.close()
 
     print()
     print("=" * 60)
     print("  Setup complete!")
-    print(f"  Database '{DB_NAME}' is ready.")
     print(f"  First match: {TOURNAMENT_START}")
     print(f"  Final:       {TOURNAMENT_START + timedelta(days=31)}")
     print("=" * 60)
