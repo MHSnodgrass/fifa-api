@@ -17,12 +17,12 @@ public record PlayerRequest(
 
         Boolean isCaptain
 ) {
-        public static PlayerRequest from(TeamPlayer player) {
-              return new PlayerRequest(
-                      player.getName(),
-                      player.getNumber(),
-                      player.getPosition(),
-                      player.getIsCaptain()
-              );
-        }
+    public TeamPlayer toEntity() {
+        return new TeamPlayer(
+                this.name,
+                this.number,
+                this.position,
+                this.isCaptain
+        );
+    }
 }

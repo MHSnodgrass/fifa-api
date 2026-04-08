@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record TeamRequest(
@@ -36,17 +37,20 @@ public record TeamRequest(
         @Valid
         TeamStatsRequest stats
 ) {
-        public static TeamRequest from(Team team) {
-              return new TeamRequest(
-                      team.getCountryName(),
-                      team.getCountryCode(),
-                      team.getGroupLetter(),
-                      team.getFlagUrl(),
-                      team.getLogoUrl(),
-                      team.getFifaRanking(),
-                      team.getManagerName(),
-                      team.getSquad() == null ? List.of() : team.getSquad().stream().map(PlayerRequest::from).toList(),
-                      TeamStatsRequest.from(team.getStats())
-              );
+        public Team toEntity() {
+                Team team = new Team();
+                team.setCountryName(this.countryName);
+                team.setCountryCode(this.countryCode);
+                team.setGroupLetter(this.groupLetter);
+                team.setFlagUrl(this.flagUrl);
+                team.setLogoUrl(this.logoUrl);
+                team.setFifaRanking(this.fifaRanking);
+                team.setManagerName(this.managerName);
+                team.setSquad(this.squad.stream().map(PlayerRequest::toEntity).toList());
+                team.setStats(this.stats.toEntity());
+                team.setCreatedAt(LocalDateTime.now());
+                team.setUpdatedAt(LocalDateTime.now());
+
+                return team;
         }
 }

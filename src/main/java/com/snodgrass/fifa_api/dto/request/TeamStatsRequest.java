@@ -16,19 +16,21 @@ public record TeamStatsRequest(
         @Min(0) int redCards,
         boolean eliminated
 ) {
-    public static TeamStatsRequest from(TeamStats teamStats) {
-        return new TeamStatsRequest(
-                teamStats.getMatchesPlayed(),
-                teamStats.getWins(),
-                teamStats.getDraws(),
-                teamStats.getLosses(),
-                teamStats.getGoalsFor(),
-                teamStats.getGoalsAgainst(),
-                teamStats.getGoalDifference(),
-                teamStats.getGroupPoints(),
-                teamStats.getYellowCards(),
-                teamStats.getRedCards(),
-                teamStats.isEliminated()
-        );
+    public TeamStats toEntity() {
+        TeamStats stats = new TeamStats();
+
+        stats.setMatchesPlayed(this.matchesPlayed);
+        stats.setWins(this.wins);
+        stats.setDraws(this.draws);
+        stats.setLosses(this.losses);
+        stats.setGoalsFor(this.goalsFor);
+        stats.setGoalsAgainst(this.goalsAgainst);
+        stats.setGoalDifference(this.goalDifference);
+        stats.setGroupPoints(this.groupPoints);
+        stats.setYellowCards(this.yellowCards);
+        stats.setRedCards(this.redCards);
+        stats.setEliminated(this.eliminated);
+
+        return stats;
     }
 }
