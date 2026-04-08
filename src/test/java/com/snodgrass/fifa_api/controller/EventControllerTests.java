@@ -1,5 +1,6 @@
 package com.snodgrass.fifa_api.controller;
 
+import com.snodgrass.fifa_api.dto.request.EventRequest;
 import com.snodgrass.fifa_api.dto.response.EventResponse;
 import com.snodgrass.fifa_api.model.Event;
 import com.snodgrass.fifa_api.model.Team;
@@ -24,7 +25,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EventControllerTests {
@@ -185,6 +188,82 @@ class EventControllerTests {
         when(teamService.getTeamById(99L)).thenThrow(new EntityNotFoundException("Team not found with id: 99"));
 
         assertThatThrownBy(() -> eventController.getEventsByTeam(99L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("99");
+    }
+
+    // CUD helpers
+
+    private EventRequest validEventRequest() {
+        return new EventRequest(1, Stage.GROUP, Group.A,
+                1L, 2L, null, null,
+                LocalDate.of(2026, 6, 11), null, null,
+                "MetLife Stadium", "New York",
+                MatchStatus.SCHEDULED, null, null, null, null, false, false);
+    }
+
+    // createEvent
+
+    @Test
+    void createEvent_returns201WithBody() {
+        EventRequest request = validEventRequest();
+        when(eventService.createEvent(any(EventRequest.class))).thenReturn(event);
+
+        ResponseEntity<EventResponse> response = eventController.createEvent(request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().id()).isEqualTo(1L);
+        assertThat(response.getBody().matchNumber()).isEqualTo(1);
+        verify(eventService, times(1)).createEvent(any(EventRequest.class));
+    }
+
+    // updateEvent
+
+    @Test
+    void updateEvent_returns200WithBody() {
+        EventRequest request = validEventRequest();
+        when(eventService.updateEvent(eq(1L), any(EventRequest.class))).thenReturn(event);
+
+        ResponseEntity<EventResponse> response = eventController.updateEvent(1L, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().id()).isEqualTo(1L);
+        assertThat(response.getBody().matchNumber()).isEqualTo(1);
+        verify(eventService, times(1)).updateEvent(eq(1L), any(EventRequest.class));
+    }
+
+    @Test
+    void updateEvent_throwsEntityNotFoundException_whenNotFound() {
+        EventRequest request = validEventRequest();
+        when(eventService.updateEvent(eq(99L), any(EventRequest.class)))
+                .thenThrow(new EntityNotFoundException("Event not found with id: 99"));
+
+        assertThatThrownBy(() -> eventController.updateEvent(99L, request))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("99");
+    }
+
+    // deleteEvent
+
+    @Test
+    void deleteEvent_returns204() {
+        doNothing().when(eventService).deleteEvent(1L);
+
+        ResponseEntity<Void> response = eventController.deleteEvent(1L);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(response.getBody()).isNull();
+        verify(eventService, times(1)).deleteEvent(1L);
+    }
+
+    @Test
+    void deleteEvent_throwsEntityNotFoundException_whenNotFound() {
+        doThrow(new EntityNotFoundException("Event not found with id: 99"))
+                .when(eventService).deleteEvent(99L);
+
+        assertThatThrownBy(() -> eventController.deleteEvent(99L))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("99");
     }

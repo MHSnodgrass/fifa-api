@@ -1,5 +1,6 @@
 package com.snodgrass.fifa_api.controller;
 
+import com.snodgrass.fifa_api.config.ApiHeaders;
 import com.snodgrass.fifa_api.dto.response.EventResponse;
 import com.snodgrass.fifa_api.dto.response.TeamDetailResponse;
 import com.snodgrass.fifa_api.dto.response.TeamResponse;
@@ -108,7 +109,7 @@ class ControllerIntegrationTests {
 
         ResponseEntity<TeamDetailResponse> response = restClient.post()
                 .uri("/api/teams")
-                .header("X-DB-STATE", "MODIFIED")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(json)
                 .retrieve()
@@ -127,7 +128,7 @@ class ControllerIntegrationTests {
         String createName = "Update Pre " + createCode;
         ResponseEntity<TeamDetailResponse> createResponse = restClient.post()
                 .uri("/api/teams")
-                .header("X-DB-STATE", "MODIFIED")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(teamJson(createName, createCode))
                 .retrieve()
@@ -139,7 +140,7 @@ class ControllerIntegrationTests {
         String updateName = "Update Post " + updateCode;
         ResponseEntity<TeamDetailResponse> response = restClient.put()
                 .uri("/api/teams/" + teamId)
-                .header("X-DB-STATE", "MODIFIED")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(teamJson(updateName, updateCode))
                 .retrieve()
@@ -157,7 +158,7 @@ class ControllerIntegrationTests {
         String delCode = randomCode();
         ResponseEntity<TeamDetailResponse> createResponse = restClient.post()
                 .uri("/api/teams")
-                .header("X-DB-STATE", "MODIFIED")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(teamJson("Delete Test " + delCode, delCode))
                 .retrieve()
@@ -167,7 +168,7 @@ class ControllerIntegrationTests {
 
         ResponseEntity<Void> response = restClient.delete()
                 .uri("/api/teams/" + teamId)
-                .header("X-DB-STATE", "MODIFIED")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
                 .retrieve()
                 .toBodilessEntity();
 
