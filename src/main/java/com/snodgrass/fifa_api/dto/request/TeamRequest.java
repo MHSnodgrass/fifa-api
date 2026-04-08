@@ -1,5 +1,6 @@
 package com.snodgrass.fifa_api.dto.request;
 
+import com.snodgrass.fifa_api.model.Team;
 import com.snodgrass.fifa_api.model.enums.Group;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -34,4 +35,18 @@ public record TeamRequest(
 
         @Valid
         TeamStatsRequest stats
-) {}
+) {
+        public static TeamRequest from(Team team) {
+              return new TeamRequest(
+                      team.getCountryName(),
+                      team.getCountryCode(),
+                      team.getGroupLetter(),
+                      team.getFlagUrl(),
+                      team.getLogoUrl(),
+                      team.getFifaRanking(),
+                      team.getManagerName(),
+                      team.getSquad() == null ? List.of() : team.getSquad().stream().map(PlayerRequest::from).toList(),
+                      TeamStatsRequest.from(team.getStats())
+              );
+        }
+}

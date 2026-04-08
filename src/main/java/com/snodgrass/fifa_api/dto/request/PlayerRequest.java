@@ -1,5 +1,6 @@
 package com.snodgrass.fifa_api.dto.request;
 
+import com.snodgrass.fifa_api.model.TeamPlayer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Min;
@@ -15,4 +16,13 @@ public record PlayerRequest(
         String position,
 
         Boolean isCaptain
-) {}
+) {
+        public static PlayerRequest from(TeamPlayer player) {
+              return new PlayerRequest(
+                      player.getName(),
+                      player.getNumber(),
+                      player.getPosition(),
+                      player.getIsCaptain()
+              );
+        }
+}

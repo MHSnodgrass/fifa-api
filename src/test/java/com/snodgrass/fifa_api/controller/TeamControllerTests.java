@@ -3,6 +3,7 @@ package com.snodgrass.fifa_api.controller;
 import com.snodgrass.fifa_api.dto.response.TeamDetailResponse;
 import com.snodgrass.fifa_api.dto.response.TeamResponse;
 import com.snodgrass.fifa_api.model.Team;
+import com.snodgrass.fifa_api.model.TeamPlayer;
 import com.snodgrass.fifa_api.model.enums.Group;
 import com.snodgrass.fifa_api.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
@@ -39,7 +40,7 @@ class TeamControllerTests {
         team.setCountryName("Brazil");
         team.setCountryCode("BRA");
         team.setGroupLetter(Group.A);
-        team.setSquad("[{\"name\":\"Neymar Jr\",\"number\":10,\"position\":\"FW\",\"isCaptain\":true}]");
+        team.setSquad(List.of(new TeamPlayer("Neymar Jr", 10, "FW", true)));
         team.setCreatedAt(LocalDateTime.now());
         team.setUpdatedAt(LocalDateTime.now());
     }

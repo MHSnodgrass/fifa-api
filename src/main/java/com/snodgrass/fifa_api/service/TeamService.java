@@ -1,7 +1,9 @@
 package com.snodgrass.fifa_api.service;
 
+import com.snodgrass.fifa_api.dto.request.TeamRequest;
 import com.snodgrass.fifa_api.model.Team;
 import com.snodgrass.fifa_api.model.enums.Group;
+import com.snodgrass.fifa_api.repository.EventRepository;
 import com.snodgrass.fifa_api.repository.TeamRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TeamService {
     private final TeamRepository teamRepository;
+    private final EventRepository eventRepository;
 
     public List<Team> getAllTeams() {
         return teamRepository.findAll();
