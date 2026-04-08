@@ -1,7 +1,7 @@
 package com.snodgrass.fifa_api.controller;
 
-import com.snodgrass.fifa_api.dto.TeamDetailResponse;
-import com.snodgrass.fifa_api.dto.TeamResponse;
+import com.snodgrass.fifa_api.dto.response.TeamDetailResponse;
+import com.snodgrass.fifa_api.dto.response.TeamResponse;
 import com.snodgrass.fifa_api.model.enums.Group;
 import com.snodgrass.fifa_api.service.TeamService;
 import io.swagger.v3.oas.annotations.Operation;

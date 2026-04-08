@@ -1,4 +1,4 @@
-package com.snodgrass.fifa_api.dto;
+package com.snodgrass.fifa_api.dto.response;
 
 public record PlayerResponse (
     String name,

@@ -1,4 +1,4 @@
-package com.snodgrass.fifa_api.dto;
+package com.snodgrass.fifa_api.dto.response;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;

@@ -1,7 +1,7 @@
 package com.snodgrass.fifa_api.controller;
 
-import com.snodgrass.fifa_api.dto.EventResponse;
-import com.snodgrass.fifa_api.dto.TeamResponse;
+import com.snodgrass.fifa_api.dto.response.EventResponse;
+import com.snodgrass.fifa_api.dto.response.TeamResponse;
 import com.snodgrass.fifa_api.exception.ErrorResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
