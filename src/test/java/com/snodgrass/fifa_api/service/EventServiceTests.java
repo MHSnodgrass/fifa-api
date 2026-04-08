@@ -1,11 +1,13 @@
 package com.snodgrass.fifa_api.service;
 
+import com.snodgrass.fifa_api.dto.request.EventRequest;
 import com.snodgrass.fifa_api.model.Event;
 import com.snodgrass.fifa_api.model.Team;
 import com.snodgrass.fifa_api.model.enums.Group;
 import com.snodgrass.fifa_api.model.enums.MatchStatus;
 import com.snodgrass.fifa_api.model.enums.Stage;
 import com.snodgrass.fifa_api.repository.EventRepository;
+import com.snodgrass.fifa_api.repository.TeamRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,9 @@ class EventServiceTests {
 
     @Mock
     private EventRepository eventRepository;
+
+    @Mock
+    private TeamRepository teamRepository;
 
     @InjectMocks
     private EventService eventService;
@@ -165,5 +170,160 @@ class EventServiceTests {
         List<Event> result = eventService.getEventsByTeam(team);
 
         assertThat(result).isEmpty();
+    }
+
+    // CUD helpers
+
+    private EventRequest validEventRequest() {
+        return new EventRequest(1, Stage.GROUP, Group.A,
+                1L, 2L, null, null,
+                LocalDate.of(2026, 6, 11), null, null,
+                "MetLife Stadium", "New York",
+                MatchStatus.SCHEDULED, null, null, null, null, false, false);
+    }
+
+    private EventRequest knockoutEventRequest() {
+        return new EventRequest(49, Stage.QUARTERFINAL, null,
+                null, null, "Winner Group A", "Runner-up Group B",
+                LocalDate.of(2026, 7, 4), null, null,
+                "MetLife Stadium", "New York",
+                MatchStatus.SCHEDULED, null, null, null, null, false, false);
+    }
+
+    private Team createTeam(Long id, String name) {
+        Team t = new Team();
+        t.setId(id);
+        t.setCountryName(name);
+        t.setCountryCode(name.substring(0, 3).toUpperCase());
+        t.setGroupLetter(Group.A);
+        t.setCreatedAt(LocalDateTime.now());
+        t.setUpdatedAt(LocalDateTime.now());
+        return t;
+    }
+
+    // createEvent
+
+    @Test
+    void createEvent_savesAndReturnsEvent() {
+        EventRequest request = validEventRequest();
+        Team home = createTeam(1L, "Brazil");
+        Team away = createTeam(2L, "Argentina");
+        when(teamRepository.findById(1L)).thenReturn(Optional.of(home));
+        when(teamRepository.findById(2L)).thenReturn(Optional.of(away));
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
+            Event saved = invocation.getArgument(0);
+            saved.setId(1L);
+            return saved;
+        });
+
+        Event result = eventService.createEvent(request);
+
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getMatchNumber()).isEqualTo(1);
+        assertThat(result.getHomeTeam()).isEqualTo(home);
+        assertThat(result.getAwayTeam()).isEqualTo(away);
+        verify(eventRepository, times(1)).save(any(Event.class));
+    }
+
+    @Test
+    void createEvent_withNullTeamIds_savesWithoutTeams() {
+        EventRequest request = knockoutEventRequest();
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
+            Event saved = invocation.getArgument(0);
+            saved.setId(1L);
+            return saved;
+        });
+
+        Event result = eventService.createEvent(request);
+
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getHomeTeam()).isNull();
+        assertThat(result.getAwayTeam()).isNull();
+        assertThat(result.getHomeTeamPlaceholder()).isEqualTo("Winner Group A");
+        verify(teamRepository, never()).findById(any());
+    }
+
+    @Test
+    void createEvent_throwsEntityNotFoundException_whenHomeTeamNotFound() {
+        EventRequest request = validEventRequest();
+        when(teamRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventService.createEvent(request))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Home team not found");
+
+        verify(eventRepository, never()).save(any(Event.class));
+    }
+
+    @Test
+    void createEvent_throwsEntityNotFoundException_whenAwayTeamNotFound() {
+        EventRequest request = validEventRequest();
+        Team home = createTeam(1L, "Brazil");
+        when(teamRepository.findById(1L)).thenReturn(Optional.of(home));
+        when(teamRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventService.createEvent(request))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Away team not found");
+
+        verify(eventRepository, never()).save(any(Event.class));
+    }
+
+    // updateEvent
+
+    @Test
+    void updateEvent_savesAndReturnsUpdatedEvent() {
+        EventRequest request = validEventRequest();
+        Team home = createTeam(1L, "Brazil");
+        Team away = createTeam(2L, "Argentina");
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(teamRepository.findById(1L)).thenReturn(Optional.of(home));
+        when(teamRepository.findById(2L)).thenReturn(Optional.of(away));
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
+            Event saved = invocation.getArgument(0);
+            saved.setId(1L);
+            return saved;
+        });
+
+        Event result = eventService.updateEvent(1L, request);
+
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getMatchNumber()).isEqualTo(1);
+        verify(eventRepository, times(1)).findById(1L);
+        verify(eventRepository, times(1)).save(any(Event.class));
+    }
+
+    @Test
+    void updateEvent_throwsEntityNotFoundException_whenEventNotFound() {
+        EventRequest request = validEventRequest();
+        when(eventRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventService.updateEvent(99L, request))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("99");
+
+        verify(eventRepository, never()).save(any(Event.class));
+    }
+
+    // deleteEvent
+
+    @Test
+    void deleteEvent_deletesEvent() {
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+        eventService.deleteEvent(1L);
+
+        verify(eventRepository, times(1)).delete(event);
+    }
+
+    @Test
+    void deleteEvent_throwsEntityNotFoundException_whenNotFound() {
+        when(eventRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventService.deleteEvent(99L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("99");
+
+        verify(eventRepository, never()).delete(any(Event.class));
     }
 }

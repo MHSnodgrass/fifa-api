@@ -38,8 +38,6 @@ class TenantInterceptorTests {
     void setUp() {
         ReflectionTestUtils.setField(tenantInterceptor, "defaultSchema", "default_db");
         ReflectionTestUtils.setField(tenantInterceptor, "testSchema", "test_db");
-        ReflectionTestUtils.setField(tenantInterceptor, "httpTestHeader", "X-DB-STATE");
-        ReflectionTestUtils.setField(tenantInterceptor, "httpTestHeaderValue", "MODIFIED");
         TenantContext.clear();
     }
 
