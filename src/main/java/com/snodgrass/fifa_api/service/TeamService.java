@@ -1,7 +1,10 @@
 package com.snodgrass.fifa_api.service;
 
+import com.snodgrass.fifa_api.dto.request.TeamRequest;
+import com.snodgrass.fifa_api.exception.TeamHasEventsException;
 import com.snodgrass.fifa_api.model.Team;
 import com.snodgrass.fifa_api.model.enums.Group;
+import com.snodgrass.fifa_api.repository.EventRepository;
 import com.snodgrass.fifa_api.repository.TeamRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TeamService {
     private final TeamRepository teamRepository;
+    private final EventRepository eventRepository;
 
     public List<Team> getAllTeams() {
         return teamRepository.findAll();
@@ -25,5 +29,22 @@ public class TeamService {
 
     public List<Team> getTeamsByGroup(Group group) {
         return teamRepository.findByGroupLetter(group);
+    }
+
+    public Team createTeam(TeamRequest teamRequest) {
+        return teamRepository.save(teamRequest.toEntity());
+    }
+
+    public Team updateTeam(Long id, TeamRequest dto) {
+        teamRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + id));
+        return teamRepository.save(dto.toEntity());
+    }
+
+    public void deleteTeam(Long id) {
+        Team team = teamRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + id));
+        if (eventRepository.existsByHomeTeamOrAwayTeam(team, team)) {
+            throw new TeamHasEventsException(id);
+        }
+        teamRepository.delete(team);
     }
 }

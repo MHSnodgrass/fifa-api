@@ -1,11 +1,13 @@
 package com.snodgrass.fifa_api.model;
 
+import com.snodgrass.fifa_api.model.converter.TeamPlayerListConverter;
 import com.snodgrass.fifa_api.model.enums.Group;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "teams")
@@ -27,7 +29,8 @@ public class Team {
     private Group groupLetter;
 
     @Column(name = "squad", columnDefinition = "JSON")
-    private String squad;
+    @Convert(converter = TeamPlayerListConverter.class)
+    private List<TeamPlayer> squad;
 
     @Embedded
     private TeamStats stats;

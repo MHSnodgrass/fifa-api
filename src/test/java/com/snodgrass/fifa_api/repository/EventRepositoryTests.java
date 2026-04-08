@@ -59,4 +59,19 @@ public class EventRepositoryTests {
                 e.getAwayTeam().getId().equals(team.getId())
         );
     }
+
+    @Test
+    void existsByHomeTeamOrAwayTeam_returnsTrue_whenTeamHasEvents() {
+        Team team = teamRepository.findAll().getFirst();
+        boolean exists = eventRepository.existsByHomeTeamOrAwayTeam(team, team);
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    void existsByHomeTeamOrAwayTeam_returnsFalse_whenTeamHasNoEvents() {
+        Team team = new Team();
+        team.setId(999999L);
+        boolean exists = eventRepository.existsByHomeTeamOrAwayTeam(team, team);
+        assertThat(exists).isFalse();
+    }
 }

@@ -1,6 +1,6 @@
 package com.snodgrass.fifa_api.controller;
 
-import com.snodgrass.fifa_api.dto.EventResponse;
+import com.snodgrass.fifa_api.dto.response.EventResponse;
 import com.snodgrass.fifa_api.model.Event;
 import com.snodgrass.fifa_api.model.Team;
 import com.snodgrass.fifa_api.model.enums.Group;

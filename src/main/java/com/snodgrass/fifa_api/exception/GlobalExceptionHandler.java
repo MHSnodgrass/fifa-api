@@ -3,6 +3,7 @@ package com.snodgrass.fifa_api.exception;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -15,6 +16,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(404, ex.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(TeamHasEventsException.class)
+    public ResponseEntity<ErrorResponse> handleTeamHasEvents(TeamHasEventsException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(409, ex.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(400, ex.getMessage(), LocalDateTime.now()));
     }
 
     @ExceptionHandler(Exception.class)

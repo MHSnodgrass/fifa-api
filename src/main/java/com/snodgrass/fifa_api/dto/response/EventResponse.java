@@ -1,4 +1,4 @@
-package com.snodgrass.fifa_api.dto;
+package com.snodgrass.fifa_api.dto.response;
 
 import com.snodgrass.fifa_api.model.Event;
 import com.snodgrass.fifa_api.model.enums.Group;
