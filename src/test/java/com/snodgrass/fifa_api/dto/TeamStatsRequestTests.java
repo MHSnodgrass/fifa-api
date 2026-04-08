@@ -1,6 +1,7 @@
 package com.snodgrass.fifa_api.dto;
 
 import com.snodgrass.fifa_api.dto.request.TeamStatsRequest;
+import com.snodgrass.fifa_api.model.TeamStats;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -69,5 +70,36 @@ class TeamStatsRequestTests {
         Set<ConstraintViolation<TeamStatsRequest>> violations = validator.validate(stats);
         assertThat(violations)
                 .anyMatch(v -> v.getPropertyPath().toString().equals(fieldName));
+    }
+
+    // toEntity
+
+    @Test
+    void toEntity_mapsAllFields() {
+        TeamStatsRequest request = new TeamStatsRequest(3, 2, 1, 0, 5, 2, 3, 7, 3, 1, false);
+
+        TeamStats entity = request.toEntity();
+
+        assertThat(entity.getMatchesPlayed()).isEqualTo(3);
+        assertThat(entity.getWins()).isEqualTo(2);
+        assertThat(entity.getDraws()).isEqualTo(1);
+        assertThat(entity.getLosses()).isEqualTo(0);
+        assertThat(entity.getGoalsFor()).isEqualTo(5);
+        assertThat(entity.getGoalsAgainst()).isEqualTo(2);
+        assertThat(entity.getGoalDifference()).isEqualTo(3);
+        assertThat(entity.getGroupPoints()).isEqualTo(7);
+        assertThat(entity.getYellowCards()).isEqualTo(3);
+        assertThat(entity.getRedCards()).isEqualTo(1);
+        assertThat(entity.isEliminated()).isFalse();
+    }
+
+    @Test
+    void toEntity_withEliminated_mapsCorrectly() {
+        TeamStatsRequest request = new TeamStatsRequest(3, 0, 0, 3, 1, 5, -4, 0, 0, 0, true);
+
+        TeamStats entity = request.toEntity();
+
+        assertThat(entity.isEliminated()).isTrue();
+        assertThat(entity.getGoalDifference()).isEqualTo(-4);
     }
 }

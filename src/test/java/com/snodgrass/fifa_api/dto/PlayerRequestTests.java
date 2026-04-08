@@ -1,6 +1,7 @@
 package com.snodgrass.fifa_api.dto;
 
 import com.snodgrass.fifa_api.dto.request.PlayerRequest;
+import com.snodgrass.fifa_api.model.TeamPlayer;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -94,5 +95,29 @@ class PlayerRequestTests {
         PlayerRequest player = new PlayerRequest("Neymar Jr", 10, "", true);
         Set<ConstraintViolation<PlayerRequest>> violations = validator.validate(player);
         assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("position"));
+    }
+
+    // toEntity
+
+    @Test
+    void toEntity_mapsAllFields() {
+        PlayerRequest request = new PlayerRequest("Neymar Jr", 10, "FW", true);
+
+        TeamPlayer entity = request.toEntity();
+
+        assertThat(entity.getName()).isEqualTo("Neymar Jr");
+        assertThat(entity.getNumber()).isEqualTo(10);
+        assertThat(entity.getPosition()).isEqualTo("FW");
+        assertThat(entity.getIsCaptain()).isTrue();
+    }
+
+    @Test
+    void toEntity_withNullIsCaptain_mapsNullCaptain() {
+        PlayerRequest request = new PlayerRequest("Alisson", 1, "GK", null);
+
+        TeamPlayer entity = request.toEntity();
+
+        assertThat(entity.getName()).isEqualTo("Alisson");
+        assertThat(entity.getIsCaptain()).isNull();
     }
 }

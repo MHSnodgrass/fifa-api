@@ -4,6 +4,7 @@ import com.snodgrass.fifa_api.dto.request.PlayerRequest;
 import com.snodgrass.fifa_api.dto.request.TeamRequest;
 import com.snodgrass.fifa_api.dto.request.TeamStatsRequest;
 
+import com.snodgrass.fifa_api.model.Team;
 import com.snodgrass.fifa_api.model.enums.Group;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -149,5 +150,46 @@ class TeamRequestTests {
         Set<ConstraintViolation<TeamRequest>> violations = validator.validate(request);
         assertThat(violations).isNotEmpty();
         assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().contains("stats"));
+    }
+
+    // toEntity
+
+    @Test
+    void toEntity_mapsAllFields() {
+        List<PlayerRequest> squad = List.of(
+                new PlayerRequest("Neymar Jr", 10, "FW", true)
+        );
+        TeamStatsRequest stats = new TeamStatsRequest(3, 2, 1, 0, 5, 2, 3, 7, 3, 1, false);
+        TeamRequest request = new TeamRequest("Brazil", "BRA", Group.A,
+                "/flags/bra.png", "/logos/bra.png", 1, "Dorival Júnior", squad, stats);
+
+        Team entity = request.toEntity();
+
+        assertThat(entity.getCountryName()).isEqualTo("Brazil");
+        assertThat(entity.getCountryCode()).isEqualTo("BRA");
+        assertThat(entity.getGroupLetter()).isEqualTo(Group.A);
+        assertThat(entity.getFlagUrl()).isEqualTo("/flags/bra.png");
+        assertThat(entity.getLogoUrl()).isEqualTo("/logos/bra.png");
+        assertThat(entity.getFifaRanking()).isEqualTo(1);
+        assertThat(entity.getManagerName()).isEqualTo("Dorival Júnior");
+        assertThat(entity.getSquad()).hasSize(1);
+        assertThat(entity.getSquad().get(0).getName()).isEqualTo("Neymar Jr");
+        assertThat(entity.getStats()).isNotNull();
+        assertThat(entity.getStats().getWins()).isEqualTo(2);
+        assertThat(entity.getCreatedAt()).isNotNull();
+        assertThat(entity.getUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    void toEntity_setsTimestamps() {
+        TeamRequest request = new TeamRequest("Brazil", "BRA", Group.A,
+                null, null, null, null,
+                List.of(new PlayerRequest("Neymar Jr", 10, "FW", true)),
+                new TeamStatsRequest(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false));
+
+        Team entity = request.toEntity();
+
+        assertThat(entity.getCreatedAt()).isNotNull();
+        assertThat(entity.getUpdatedAt()).isNotNull();
     }
 }
