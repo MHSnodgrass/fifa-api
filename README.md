@@ -96,6 +96,9 @@ http://localhost:8080/v3/api-docs
 | GET | `/api/teams` | Get all teams |
 | GET | `/api/teams/{id}` | Get team by ID |
 | GET | `/api/teams/group/{group}` | Get teams by group (A–L) |
+| POST | `/api/teams` | Create a new team (test database only) |
+| PUT | `/api/teams/{id}` | Update a team (test database only) |
+| DELETE | `/api/teams/{id}` | Delete a team (test database only) |
 
 ### Events
 
@@ -107,6 +110,9 @@ http://localhost:8080/v3/api-docs
 | GET | `/api/events/stage/{stage}` | Get events by stage |
 | GET | `/api/events/status/{status}` | Get events by status |
 | GET | `/api/events/team/{teamId}` | Get all events involving a team |
+| POST | `/api/events` | Create a new event (test database only) |
+| PUT | `/api/events/{id}` | Update an event (test database only) |
+| DELETE | `/api/events/{id}` | Delete an event (test database only) |
 
 **Stage values:** `GROUP`, `ROUND_OF_32`, `ROUND_OF_16`, `QUARTERFINAL`, `SEMIFINAL`, `THIRD_PLACE`, `FINAL`
 
@@ -151,14 +157,14 @@ curl -H "X-DB-STATE: MODIFIED" http://localhost:8080/api/teams
 
 ### Configuration
 
-The schema names and header details are controlled by properties in `application.properties`:
+The schema names are controlled by properties in `application.properties`:
 
 ```properties
 app.tenant.default-schema=fifa_world_cup
 app.tenant.test-schema=fifa_world_cup_test
-app.tenant.http-test-header=X-DB-STATE
-app.tenant.http-test-header-value=MODIFIED
 ```
+
+The header name and value (`X-DB-STATE: MODIFIED`) are defined as constants in `ApiHeaders.java` so they live in one place and can be referenced across controllers, interceptors, and tests.
 
 ### Setup Script
 
