@@ -114,6 +114,12 @@ http://localhost:8080/v3/api-docs
 | PUT | `/api/events/{id}` | Update an event (test database only) |
 | DELETE | `/api/events/{id}` | Delete an event (test database only) |
 
+### Test
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/test/reset-db/{mode}` | Reset test DB from `TEMPLATE` or `PROD_SYNC` source (test header required) |
+
 **Stage values:** `GROUP`, `ROUND_OF_32`, `ROUND_OF_16`, `QUARTERFINAL`, `SEMIFINAL`, `THIRD_PLACE`, `FINAL`
 
 **Status values:** `SCHEDULED`, `IN_PROGRESS`, `HALFTIME`, `FINISHED`, `POSTPONED`, `CANCELLED`
@@ -132,6 +138,7 @@ Two schemas are used:
 |--------|---------|
 | `fifa_world_cup` | Production schema, used for all normal requests |
 | `fifa_world_cup_test` | Test schema, used when the test header is present |
+| `fifa_world_cup_template` | Template schema used as a clean reset source for test schema |
 
 On each request, a `HandlerInterceptor` reads an HTTP header and sets the active schema on a `ThreadLocal`. Hibernate's `CurrentTenantIdentifierResolver` reads that value to determine which schema to query, and `MultiTenantConnectionProvider` switches the JDBC connection to the correct MySQL catalog before executing any query. The `ThreadLocal` is cleared after each request completes.
 
@@ -162,13 +169,14 @@ The schema names are controlled by properties in `application.properties`:
 ```properties
 app.tenant.default-schema=fifa_world_cup
 app.tenant.test-schema=fifa_world_cup_test
+app.tenant.template-schema=fifa_world_cup_template
 ```
 
 The header name and value (`X-DB-STATE: MODIFIED`) are defined as constants in `ApiHeaders.java` so they live in one place and can be referenced across controllers, interceptors, and tests.
 
 ### Setup Script
 
-The Python setup script (`setup_worldcup.py`) creates and seeds both schemas. Run it once before starting the application or running integration tests.
+The Python setup script (`setup_worldcup.py`) creates and seeds all three schemas. Run it once before starting the application or running integration tests.
 
 ---
 
