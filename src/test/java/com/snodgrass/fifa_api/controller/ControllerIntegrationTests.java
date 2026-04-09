@@ -2,6 +2,7 @@ package com.snodgrass.fifa_api.controller;
 
 import com.snodgrass.fifa_api.config.ApiHeaders;
 import com.snodgrass.fifa_api.dto.response.EventResponse;
+import com.snodgrass.fifa_api.dto.response.ScheduleResponse;
 import com.snodgrass.fifa_api.dto.response.TeamDetailResponse;
 import com.snodgrass.fifa_api.dto.response.TeamResponse;
 import com.snodgrass.fifa_api.exception.ErrorResponse;
@@ -80,6 +81,42 @@ class ControllerIntegrationTests {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().message()).contains("999999");
+    }
+
+    // Schedule
+    @Test
+    void getSchedule_returns200WithNonEmptyList() {
+        ResponseEntity<List<ScheduleResponse>> response = restClient.get()
+                .uri("/api/schedule?startDate=2000-01-01&endDate=2100-12-31")
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotEmpty();
+        assertThat(response.getBody().getFirst().scheduledEvents()).isNotEmpty();
+        assertThat(response.getBody().getFirst().scheduledEvents().getFirst().eventId()).isNotNull();
+    }
+
+    @Test
+    void getSchedule_returns400_whenRangeInvalid() {
+        ResponseEntity<ErrorResponse> response = restClient.get()
+                .uri("/api/schedule?startDate=2026-06-12&endDate=2026-06-11")
+                .retrieve()
+                .onStatus(status -> status.value() == 400, (req, res) -> {})
+                .toEntity(ErrorResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void getSchedule_returns400_whenDateMalformed() {
+        ResponseEntity<ErrorResponse> response = restClient.get()
+                .uri("/api/schedule?startDate=bad-date&endDate=2026-06-11")
+                .retrieve()
+                .onStatus(status -> status.value() == 400, (req, res) -> {})
+                .toEntity(ErrorResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     // Team CUD

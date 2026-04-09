@@ -108,6 +108,12 @@ http://localhost:8080/v3/api-docs
 | GET | `/api/events/status/{status}` | Get events by status |
 | GET | `/api/events/team/{teamId}` | Get all events involving a team |
 
+### Schedule
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/schedule?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD` | Get grouped schedule cards by inclusive date range |
+
 ### Test
 
 | Method | Endpoint | Description |

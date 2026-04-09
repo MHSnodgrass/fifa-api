@@ -1,6 +1,8 @@
 package com.snodgrass.fifa_api.service;
 
 import com.snodgrass.fifa_api.dto.request.EventRequest;
+import com.snodgrass.fifa_api.dto.response.ScheduleEventResponse;
+import com.snodgrass.fifa_api.dto.response.ScheduleResponse;
 import com.snodgrass.fifa_api.model.Event;
 import com.snodgrass.fifa_api.model.Team;
 import com.snodgrass.fifa_api.model.enums.Group;
@@ -12,7 +14,13 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +51,22 @@ public class EventService {
 
     public List<Event> getEventsByTeam(Team team) {
         return eventRepository.findByHomeTeamOrAwayTeam(team, team);
+    }
+
+    public List<ScheduleResponse> getSchedule(LocalDate startDate, LocalDate endDate) {
+        List<Event> events = eventRepository.findByMatchDateBetweenOrderByMatchDateAscKickoffTimeAsc(startDate, endDate);
+        Map<LocalDate, List<Event>> grouped = events.stream().collect(groupingBy(
+                Event::getMatchDate,
+                LinkedHashMap::new,
+                Collectors.toList()
+        ));
+
+        return grouped.entrySet().stream()
+                .map(entry -> new ScheduleResponse(
+                        entry.getKey(),
+                        entry.getValue().stream().map(ScheduleEventResponse::from).toList()
+                ))
+                .toList();
     }
 
     public Event createEvent(EventRequest request) {
