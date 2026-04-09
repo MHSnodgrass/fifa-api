@@ -44,7 +44,7 @@ Run the setup script:
 python src/main/resources/tools/setup_worldcup.py
 ```
 
-The script will prompt for your MySQL root password and handle everything else.
+The script will prompt for your MySQL root password and handle everything else. It creates the prod database, test database, and a template database to be used in resetting the test database.
 
 ### 2. Environment Variable
 
@@ -151,7 +151,6 @@ Two schemas are used:
 |--------|---------|
 | `fifa_world_cup` | Production schema, used for all normal requests |
 | `fifa_world_cup_test` | Test schema, used when the test header is present |
-| `fifa_world_cup_template` | Template schema used as a clean reset source for test schema |
 
 On each request, a `HandlerInterceptor` reads an HTTP header and sets the active schema on a `ThreadLocal`. Hibernate's `CurrentTenantIdentifierResolver` reads that value to determine which schema to query, and `MultiTenantConnectionProvider` switches the JDBC connection to the correct MySQL catalog before executing any query. The `ThreadLocal` is cleared after each request completes.
 
