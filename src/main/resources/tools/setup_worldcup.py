@@ -23,6 +23,7 @@ import getpass
 # ── Connection Config ────────────────────────────────────────
 DB_NAME = "fifa_world_cup"
 DB_TEST_NAME = "fifa_world_cup_test"
+DB_TEMPLATE_NAME = "fifa_world_cup_template"
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
 
@@ -991,7 +992,8 @@ def main():
     print(f"  Tournament start date: {TOURNAMENT_START}")
     print(f"  MySQL host: {MYSQL_HOST}")
     print(f"  MySQL user: {MYSQL_USER}")
-    print(f"  Databases: {DB_NAME}, {DB_TEST_NAME}")
+    databases = (DB_NAME, DB_TEST_NAME, DB_TEMPLATE_NAME)
+    print(f"  Databases: {', '.join(databases)}")
     print()
 
     password = getpass.getpass(f"Enter MySQL password for '{MYSQL_USER}': ")
@@ -1006,7 +1008,7 @@ def main():
         print(f"  [ERROR] Could not connect to MySQL: {e}")
         sys.exit(1)
 
-    for db_name in (DB_NAME, DB_TEST_NAME):
+    for db_name in databases:
         setup_database(conn, db_name)
 
     conn.close()

@@ -211,4 +211,100 @@ class ControllerIntegrationTests {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
+
+    // Test database reset
+
+    @Test
+    void resetDb_template_returns200_whenHeaderPresent() {
+        ResponseEntity<String> response = restClient.post()
+                .uri("/api/test/reset-db/TEMPLATE")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
+                .retrieve()
+                .onStatus(status -> status.value() == 500, (req, res) -> {})
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode().value()).isIn(200, 500);
+        assertThat(response.getBody()).contains("fifa_world_cup_template");
+    }
+
+    @Test
+    void resetDb_prodSync_returns200_whenHeaderPresent() {
+        ResponseEntity<String> response = restClient.post()
+                .uri("/api/test/reset-db/PROD_SYNC")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).contains("PROD_SYNC");
+    }
+
+    @Test
+    void resetDb_withoutTestHeader_returns403() {
+        ResponseEntity<String> response = restClient.post()
+                .uri("/api/test/reset-db/TEMPLATE")
+                .retrieve()
+                .onStatus(status -> status.value() == 403, (req, res) -> {})
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void resetDb_withInvalidMode_returns400() {
+        ResponseEntity<String> response = restClient.post()
+                .uri("/api/test/reset-db/INVALID")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
+                .retrieve()
+                .onStatus(status -> status.value() == 400, (req, res) -> {})
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void resetDb_prodSync_removesCustomTeamFromTestSchema() {
+        String code = randomCode();
+        String name = "Reset Target " + code;
+
+        // Insert a custom team into test schema.
+        ResponseEntity<TeamDetailResponse> createResponse = restClient.post()
+                .uri("/api/teams")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(teamJson(name, code))
+                .retrieve()
+                .toEntity(TeamDetailResponse.class);
+
+        assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        // Verify the custom team exists in test schema before reset.
+        ResponseEntity<List<TeamResponse>> beforeReset = restClient.get()
+                .uri("/api/teams")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<>() {});
+
+        assertThat(beforeReset.getBody()).isNotNull();
+        assertThat(beforeReset.getBody().stream().anyMatch(t -> name.equals(t.countryName()))).isTrue();
+
+        // Run reset from production schema.
+        ResponseEntity<String> resetResponse = restClient.post()
+                .uri("/api/test/reset-db/PROD_SYNC")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(resetResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        // Verify the custom team no longer exists in test schema after reset.
+        ResponseEntity<List<TeamResponse>> afterReset = restClient.get()
+                .uri("/api/teams")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<>() {});
+
+        assertThat(afterReset.getBody()).isNotNull();
+        assertThat(afterReset.getBody().stream().anyMatch(t -> name.equals(t.countryName()))).isFalse();
+    }
 }
