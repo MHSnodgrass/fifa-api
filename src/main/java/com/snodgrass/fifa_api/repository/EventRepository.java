@@ -16,5 +16,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByStatus(MatchStatus status);
     List<Event> findByHomeTeamOrAwayTeam(Team homeTeam, Team awayTeam);
     List<Event> findByMatchDateBetweenOrderByMatchDateAscKickoffTimeAsc(LocalDate startDate, LocalDate endDate);
+    List<Event> findByStageInOrderByMatchNumberAsc(List<Stage> stages);
     boolean existsByHomeTeamOrAwayTeam(Team homeTeam, Team awayTeam);
 }

@@ -114,6 +114,13 @@ http://localhost:8080/v3/api-docs
 |--------|----------|-------------|
 | GET | `/api/schedule?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD` | Get grouped schedule cards by inclusive date range |
 
+### Standings
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/standings/group` | Get group standings by group letter with team stats |
+| GET | `/api/standings/bracket` | Get round-based knockout bracket data for bracket UI views |
+
 ### Test
 
 | Method | Endpoint | Description |
