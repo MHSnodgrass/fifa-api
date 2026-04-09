@@ -101,6 +101,24 @@ class ControllerIntegrationTests {
         return UUID.randomUUID().toString().substring(0, 3).toUpperCase();
     }
 
+    private String eventJson(int matchNumber) {
+        return """
+                {
+                    "matchNumber": %d,
+                    "stage": "GROUP",
+                    "groupLetter": "A",
+                    "homeTeamId": 1,
+                    "awayTeamId": 2,
+                    "matchDate": "2026-06-11",
+                    "arenaName": "MetLife Stadium",
+                    "city": "New York",
+                    "status": "SCHEDULED",
+                    "hasExtraTime": false,
+                    "hasPenalties": false
+                }
+                """.formatted(matchNumber);
+    }
+
     @Test
     void createTeam_returns201() {
         String code = randomCode();
@@ -108,7 +126,7 @@ class ControllerIntegrationTests {
         String json = teamJson(name, code);
 
         ResponseEntity<TeamDetailResponse> response = restClient.post()
-                .uri("/api/teams")
+                .uri("/api/test/teams")
                 .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(json)
@@ -127,7 +145,7 @@ class ControllerIntegrationTests {
         String createCode = randomCode();
         String createName = "Update Pre " + createCode;
         ResponseEntity<TeamDetailResponse> createResponse = restClient.post()
-                .uri("/api/teams")
+                .uri("/api/test/teams")
                 .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(teamJson(createName, createCode))
@@ -139,7 +157,7 @@ class ControllerIntegrationTests {
         String updateCode = randomCode();
         String updateName = "Update Post " + updateCode;
         ResponseEntity<TeamDetailResponse> response = restClient.put()
-                .uri("/api/teams/" + teamId)
+                .uri("/api/test/teams/" + teamId)
                 .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(teamJson(updateName, updateCode))
@@ -157,7 +175,7 @@ class ControllerIntegrationTests {
         // First create a team with unique data to delete
         String delCode = randomCode();
         ResponseEntity<TeamDetailResponse> createResponse = restClient.post()
-                .uri("/api/teams")
+                .uri("/api/test/teams")
                 .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(teamJson("Delete Test " + delCode, delCode))
@@ -167,7 +185,7 @@ class ControllerIntegrationTests {
         Long teamId = createResponse.getBody().id();
 
         ResponseEntity<Void> response = restClient.delete()
-                .uri("/api/teams/" + teamId)
+                .uri("/api/test/teams/" + teamId)
                 .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
                 .retrieve()
                 .toBodilessEntity();
@@ -178,7 +196,7 @@ class ControllerIntegrationTests {
     @Test
     void createTeam_withoutTestHeader_returns403() {
         ResponseEntity<String> response = restClient.post()
-                .uri("/api/teams")
+                .uri("/api/test/teams")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(teamJson("Forbidden Country", randomCode()))
                 .retrieve()
@@ -191,7 +209,7 @@ class ControllerIntegrationTests {
     @Test
     void updateTeam_withoutTestHeader_returns403() {
         ResponseEntity<String> response = restClient.put()
-                .uri("/api/teams/1")
+                .uri("/api/test/teams/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(teamJson("Forbidden Update", randomCode()))
                 .retrieve()
@@ -204,7 +222,107 @@ class ControllerIntegrationTests {
     @Test
     void deleteTeam_withoutTestHeader_returns403() {
         ResponseEntity<String> response = restClient.delete()
-                .uri("/api/teams/1")
+                .uri("/api/test/teams/1")
+                .retrieve()
+                .onStatus(status -> status.value() == 403, (req, res) -> {})
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    // Event CUD
+
+    @Test
+    void createEvent_returns201() {
+        ResponseEntity<EventResponse> response = restClient.post()
+                .uri("/api/test/events")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(eventJson(5001))
+                .retrieve()
+                .toEntity(EventResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().matchNumber()).isEqualTo(5001);
+    }
+
+    @Test
+    void updateEvent_returns200() {
+        ResponseEntity<EventResponse> createResponse = restClient.post()
+                .uri("/api/test/events")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(eventJson(5002))
+                .retrieve()
+                .toEntity(EventResponse.class);
+
+        Long eventId = createResponse.getBody().id();
+
+        ResponseEntity<EventResponse> response = restClient.put()
+                .uri("/api/test/events/" + eventId)
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(eventJson(5003))
+                .retrieve()
+                .toEntity(EventResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().matchNumber()).isEqualTo(5003);
+    }
+
+    @Test
+    void deleteEvent_returns204() {
+        ResponseEntity<EventResponse> createResponse = restClient.post()
+                .uri("/api/test/events")
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(eventJson(5004))
+                .retrieve()
+                .toEntity(EventResponse.class);
+
+        Long eventId = createResponse.getBody().id();
+
+        ResponseEntity<Void> response = restClient.delete()
+                .uri("/api/test/events/" + eventId)
+                .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
+                .retrieve()
+                .toBodilessEntity();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    }
+
+    @Test
+    void createEvent_withoutTestHeader_returns403() {
+        ResponseEntity<String> response = restClient.post()
+                .uri("/api/test/events")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(eventJson(5005))
+                .retrieve()
+                .onStatus(status -> status.value() == 403, (req, res) -> {})
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void updateEvent_withoutTestHeader_returns403() {
+        ResponseEntity<String> response = restClient.put()
+                .uri("/api/test/events/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(eventJson(5006))
+                .retrieve()
+                .onStatus(status -> status.value() == 403, (req, res) -> {})
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void deleteEvent_withoutTestHeader_returns403() {
+        ResponseEntity<String> response = restClient.delete()
+                .uri("/api/test/events/1")
                 .retrieve()
                 .onStatus(status -> status.value() == 403, (req, res) -> {})
                 .toEntity(String.class);
@@ -269,7 +387,7 @@ class ControllerIntegrationTests {
 
         // Insert a custom team into test schema.
         ResponseEntity<TeamDetailResponse> createResponse = restClient.post()
-                .uri("/api/teams")
+                .uri("/api/test/teams")
                 .header(ApiHeaders.TEST_HEADER, ApiHeaders.TEST_HEADER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(teamJson(name, code))

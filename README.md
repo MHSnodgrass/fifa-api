@@ -96,9 +96,6 @@ http://localhost:8080/v3/api-docs
 | GET | `/api/teams` | Get all teams |
 | GET | `/api/teams/{id}` | Get team by ID |
 | GET | `/api/teams/group/{group}` | Get teams by group (A–L) |
-| POST | `/api/teams` | Create a new team (test database only) |
-| PUT | `/api/teams/{id}` | Update a team (test database only) |
-| DELETE | `/api/teams/{id}` | Delete a team (test database only) |
 
 ### Events
 
@@ -110,15 +107,18 @@ http://localhost:8080/v3/api-docs
 | GET | `/api/events/stage/{stage}` | Get events by stage |
 | GET | `/api/events/status/{status}` | Get events by status |
 | GET | `/api/events/team/{teamId}` | Get all events involving a team |
-| POST | `/api/events` | Create a new event (test database only) |
-| PUT | `/api/events/{id}` | Update an event (test database only) |
-| DELETE | `/api/events/{id}` | Delete an event (test database only) |
 
 ### Test
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/test/reset-db/{mode}` | Reset test DB from `TEMPLATE` or `PROD_SYNC` source (test header required) |
+| POST | `/api/test/teams` | Create a new team (test database only) |
+| PUT | `/api/test/teams/{id}` | Update a team (test database only) |
+| DELETE | `/api/test/teams/{id}` | Delete a team (test database only) |
+| POST | `/api/test/events` | Create a new event (test database only) |
+| PUT | `/api/test/events/{id}` | Update an event (test database only) |
+| DELETE | `/api/test/events/{id}` | Delete an event (test database only) |
 
 **Stage values:** `GROUP`, `ROUND_OF_32`, `ROUND_OF_16`, `QUARTERFINAL`, `SEMIFINAL`, `THIRD_PLACE`, `FINAL`
 
