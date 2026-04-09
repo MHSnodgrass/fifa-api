@@ -1,7 +1,9 @@
 package com.snodgrass.fifa_api.controller;
 
 import com.snodgrass.fifa_api.config.ApiHeaders;
+import com.snodgrass.fifa_api.dto.response.BracketStandingsResponse;
 import com.snodgrass.fifa_api.dto.response.EventResponse;
+import com.snodgrass.fifa_api.dto.response.GroupStandingsResponse;
 import com.snodgrass.fifa_api.dto.response.ScheduleResponse;
 import com.snodgrass.fifa_api.dto.response.TeamDetailResponse;
 import com.snodgrass.fifa_api.dto.response.TeamResponse;
@@ -117,6 +119,32 @@ class ControllerIntegrationTests {
                 .toEntity(ErrorResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    // Standings
+    @Test
+    void getGroupStandings_returns200WithGroups() {
+        ResponseEntity<List<GroupStandingsResponse>> response = restClient.get()
+                .uri("/api/standings/group")
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotEmpty();
+        assertThat(response.getBody().getFirst().groupLetter()).isNotNull();
+    }
+
+    @Test
+    void getBracketStandings_returns200WithRounds() {
+        ResponseEntity<BracketStandingsResponse> response = restClient.get()
+                .uri("/api/standings/bracket")
+                .retrieve()
+                .toEntity(BracketStandingsResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().roundOf32()).isNotNull();
+        assertThat(response.getBody().finalStage()).isNotNull();
     }
 
     // Team CUD
