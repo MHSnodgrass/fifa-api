@@ -7,6 +7,7 @@ import com.snodgrass.fifa_api.model.enums.MatchStatus;
 import com.snodgrass.fifa_api.model.enums.Stage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
@@ -14,5 +15,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByStage(Stage stage);
     List<Event> findByStatus(MatchStatus status);
     List<Event> findByHomeTeamOrAwayTeam(Team homeTeam, Team awayTeam);
+    List<Event> findByMatchDateBetweenOrderByMatchDateAscKickoffTimeAsc(LocalDate startDate, LocalDate endDate);
     boolean existsByHomeTeamOrAwayTeam(Team homeTeam, Team awayTeam);
 }

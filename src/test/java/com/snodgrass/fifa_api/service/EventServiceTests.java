@@ -1,6 +1,7 @@
 package com.snodgrass.fifa_api.service;
 
 import com.snodgrass.fifa_api.dto.request.EventRequest;
+import com.snodgrass.fifa_api.dto.response.ScheduleResponse;
 import com.snodgrass.fifa_api.model.Event;
 import com.snodgrass.fifa_api.model.Team;
 import com.snodgrass.fifa_api.model.enums.Group;
@@ -325,5 +326,69 @@ class EventServiceTests {
                 .hasMessageContaining("99");
 
         verify(eventRepository, never()).delete(any(Event.class));
+    }
+
+    @Test
+    void getSchedule_groupsByDateAndMapsFields() {
+        Team home = createTeam(1L, "Brazil");
+        home.setFlagUrl("/flags/bra.png");
+        Team away = createTeam(2L, "Argentina");
+        away.setFlagUrl("/flags/arg.png");
+
+        Event e1 = new Event();
+        e1.setId(1L);
+        e1.setMatchDate(LocalDate.of(2026, 6, 11));
+        e1.setArenaName("MetLife");
+        e1.setStatus(MatchStatus.SCHEDULED);
+        e1.setHomeTeam(home);
+        e1.setAwayTeam(away);
+
+        Event e2 = new Event();
+        e2.setId(2L);
+        e2.setMatchDate(LocalDate.of(2026, 6, 11));
+        e2.setArenaName("AT&T");
+        e2.setStatus(MatchStatus.FINISHED);
+        e2.setHomeTeam(home);
+        e2.setAwayTeam(away);
+        e2.setHomeScore(2);
+        e2.setAwayScore(1);
+
+        when(eventRepository.findByMatchDateBetweenOrderByMatchDateAscKickoffTimeAsc(
+                LocalDate.of(2026, 6, 11), LocalDate.of(2026, 6, 12)
+        )).thenReturn(List.of(e1, e2));
+
+        List<ScheduleResponse> result = eventService.getSchedule(
+                LocalDate.of(2026, 6, 11), LocalDate.of(2026, 6, 12)
+        );
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().date()).isEqualTo(LocalDate.of(2026, 6, 11));
+        assertThat(result.getFirst().scheduledEvents()).hasSize(2);
+        assertThat(result.getFirst().scheduledEvents().getFirst().eventId()).isEqualTo(1L);
+        assertThat(result.getFirst().scheduledEvents().get(1).homeScore()).isEqualTo(2);
+    }
+
+    @Test
+    void getSchedule_usesPlaceholdersWhenTeamsMissing() {
+        Event e = new Event();
+        e.setId(3L);
+        e.setMatchDate(LocalDate.of(2026, 6, 13));
+        e.setArenaName("Arena");
+        e.setStatus(MatchStatus.SCHEDULED);
+        e.setHomeTeamPlaceholder("Winner A");
+        e.setAwayTeamPlaceholder("Runner-up B");
+
+        when(eventRepository.findByMatchDateBetweenOrderByMatchDateAscKickoffTimeAsc(
+                LocalDate.of(2026, 6, 13), LocalDate.of(2026, 6, 13)
+        )).thenReturn(List.of(e));
+
+        List<ScheduleResponse> result = eventService.getSchedule(
+                LocalDate.of(2026, 6, 13), LocalDate.of(2026, 6, 13)
+        );
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().scheduledEvents()).hasSize(1);
+        assertThat(result.getFirst().scheduledEvents().getFirst().homeTeamName()).isEqualTo("Winner A");
+        assertThat(result.getFirst().scheduledEvents().getFirst().awayTeamName()).isEqualTo("Runner-up B");
     }
 }
