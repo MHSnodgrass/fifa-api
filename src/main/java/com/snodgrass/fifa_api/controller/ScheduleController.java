@@ -27,7 +27,7 @@ public class ScheduleController {
     private final EventService eventService;
 
     @Operation(summary = "Get schedule by date range",
-            description = "Returns events grouped by date with a lightweight event payload for schedule pages.")
+        description = "Returns events grouped by date with a lightweight event payload for schedule pages.")
     @ApiResponse(responseCode = "200", description = "Schedule returned successfully")
     @ApiResponse(responseCode = "400", description = "Invalid or malformed date range")
     @GetMapping

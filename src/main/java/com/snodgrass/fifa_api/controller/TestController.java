@@ -2,9 +2,11 @@ package com.snodgrass.fifa_api.controller;
 
 import com.snodgrass.fifa_api.config.ApiHeaders;
 import com.snodgrass.fifa_api.dto.request.EventRequest;
+import com.snodgrass.fifa_api.dto.request.SimulationRequest;
 import com.snodgrass.fifa_api.dto.request.TeamRequest;
 import com.snodgrass.fifa_api.dto.response.EventResponse;
 import com.snodgrass.fifa_api.dto.response.ResetDbResponse;
+import com.snodgrass.fifa_api.dto.response.SimulationResponse;
 import com.snodgrass.fifa_api.dto.response.TeamDetailResponse;
 import com.snodgrass.fifa_api.model.enums.ResetMode;
 import com.snodgrass.fifa_api.service.EventService;
@@ -29,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/test")
@@ -43,9 +47,9 @@ public class TestController {
     private String testSchema;
 
     @Operation(summary = "Reset test database from template or production schema",
-            description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to allow this write operation.",
-            parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true,
-                    description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
+        description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to allow this write operation.",
+        parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true, example = ApiHeaders.TEST_HEADER_VALUE,
+                description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
     @ApiResponse(responseCode = "200", description = "Test database reset completed")
     @ApiResponse(responseCode = "400", description = "Invalid reset mode")
     @ApiResponse(responseCode = "403", description = "Missing or invalid " + ApiHeaders.TEST_HEADER + " header")
@@ -63,10 +67,10 @@ public class TestController {
     }
 
     @Operation(summary = "Create a new team (test database only)",
-            description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to target the test database. "
-                    + "Requests without this header will be rejected with 403 Forbidden.",
-            parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true,
-                    description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
+        description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to target the test database. "
+                + "Requests without this header will be rejected with 403 Forbidden.",
+        parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true, example = ApiHeaders.TEST_HEADER_VALUE,
+                description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
     @ApiResponse(responseCode = "201", description = "Team created successfully")
     @ApiResponse(responseCode = "400", description = "Invalid request body")
     @ApiResponse(responseCode = "403", description = "Missing or invalid " + ApiHeaders.TEST_HEADER + " header")
@@ -78,10 +82,10 @@ public class TestController {
     }
 
     @Operation(summary = "Update an existing team (test database only)",
-            description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to target the test database. "
-                    + "Requests without this header will be rejected with 403 Forbidden.",
-            parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true,
-                    description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
+        description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to target the test database. "
+                + "Requests without this header will be rejected with 403 Forbidden.",
+        parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true, example = ApiHeaders.TEST_HEADER_VALUE,
+                description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
     @ApiResponse(responseCode = "200", description = "Team updated successfully")
     @ApiResponse(responseCode = "400", description = "Invalid request body")
     @ApiResponse(responseCode = "403", description = "Missing or invalid " + ApiHeaders.TEST_HEADER + " header")
@@ -96,10 +100,10 @@ public class TestController {
     }
 
     @Operation(summary = "Delete a team (test database only)",
-            description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to target the test database. "
-                    + "Requests without this header will be rejected with 403 Forbidden.",
-            parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true,
-                    description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
+        description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to target the test database. "
+                + "Requests without this header will be rejected with 403 Forbidden.",
+        parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true, example = ApiHeaders.TEST_HEADER_VALUE,
+                description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
     @ApiResponse(responseCode = "204", description = "Team deleted successfully")
     @ApiResponse(responseCode = "403", description = "Missing or invalid " + ApiHeaders.TEST_HEADER + " header")
     @ApiResponse(responseCode = "404", description = "Team not found")
@@ -112,10 +116,10 @@ public class TestController {
     }
 
     @Operation(summary = "Create a new event (test database only)",
-            description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to target the test database. "
-                    + "Requests without this header will be rejected with 403 Forbidden.",
-            parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true,
-                    description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
+        description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to target the test database. "
+                + "Requests without this header will be rejected with 403 Forbidden.",
+        parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true, example = ApiHeaders.TEST_HEADER_VALUE,
+                description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
     @ApiResponse(responseCode = "201", description = "Event created successfully")
     @ApiResponse(responseCode = "400", description = "Invalid request body")
     @ApiResponse(responseCode = "403", description = "Missing or invalid " + ApiHeaders.TEST_HEADER + " header")
@@ -127,10 +131,10 @@ public class TestController {
     }
 
     @Operation(summary = "Update an existing event (test database only)",
-            description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to target the test database. "
-                    + "Requests without this header will be rejected with 403 Forbidden.",
-            parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true,
-                    description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
+        description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to target the test database. "
+                + "Requests without this header will be rejected with 403 Forbidden.",
+        parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true, example = ApiHeaders.TEST_HEADER_VALUE,
+                description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
     @ApiResponse(responseCode = "200", description = "Event updated successfully")
     @ApiResponse(responseCode = "400", description = "Invalid request body")
     @ApiResponse(responseCode = "403", description = "Missing or invalid " + ApiHeaders.TEST_HEADER + " header")
@@ -144,10 +148,10 @@ public class TestController {
     }
 
     @Operation(summary = "Delete an event (test database only)",
-            description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to target the test database. "
-                    + "Requests without this header will be rejected with 403 Forbidden.",
-            parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true,
-                    description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
+        description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to target the test database. "
+                + "Requests without this header will be rejected with 403 Forbidden.",
+        parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true, example = ApiHeaders.TEST_HEADER_VALUE,
+                description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
     @ApiResponse(responseCode = "204", description = "Event deleted successfully")
     @ApiResponse(responseCode = "403", description = "Missing or invalid " + ApiHeaders.TEST_HEADER + " header")
     @ApiResponse(responseCode = "404", description = "Event not found")
@@ -156,5 +160,21 @@ public class TestController {
         log.debug("DELETE /api/test/events/{} - Deleting event", id);
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Run a simulation (test database only)",
+        description = "Requires the " + ApiHeaders.TEST_HEADER + ": " + ApiHeaders.TEST_HEADER_VALUE + " header to target the test database.",
+        parameters = @Parameter(name = ApiHeaders.TEST_HEADER, in = ParameterIn.HEADER, required = true, example = ApiHeaders.TEST_HEADER_VALUE,
+                description = "Must be '" + ApiHeaders.TEST_HEADER_VALUE + "' to enable write operations on the test database"))
+    @PostMapping("/simulation/run")
+    public ResponseEntity<SimulationResponse> runSimulation(@Valid @RequestBody SimulationRequest simulationRequest) {
+        log.debug("POST /api/test/simulation/run - Running simulation");
+        return ResponseEntity.ok(new SimulationResponse(
+                simulationRequest.targetStage(),
+                simulationRequest.completionStatus(),
+                0,
+                List.of(),
+                simulationRequest.seed()
+        ));
     }
 }
